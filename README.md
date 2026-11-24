@@ -82,7 +82,7 @@ npm run tournament         # 各難度對戰
 npm run sessions           # 極限的連續多局學習實驗
 ```
 
-CI 設定範例在 `docs/ci.yml.example`（放到 `.github/workflows/test.yml` 即可啟用；推送 workflow 檔需要 GitHub 的 `workflow` 授權，所以預設沒放）。
+CI：`.github/workflows/test.yml`（單元測試＋兩份 Python 交叉驗證）。
 
 ## HL（Heuristic Learning）
 
