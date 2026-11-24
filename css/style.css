@@ -151,3 +151,5 @@ dialog p, dialog li { font-size: .88rem; }
 .result-bar h2 { margin: 0 0 8px; }
 .result-bar .rv-notes { font-size: .9rem; color: var(--ink); line-height: 1.7; }
 .result-bar .rv-actions { margin-top: 10px; }
+
+footer .ver { opacity: .7; }
