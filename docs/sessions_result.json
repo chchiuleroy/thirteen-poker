@@ -10,31 +10,31 @@
     "rounds": "1-1",
     "extMinusSuper": 0,
     "ci95": 0,
-    "superVsOpp": 0.395
+    "superVsOpp": 0.383
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": -0.028,
+    "extMinusSuper": 0.006,
     "ci95": 0.026,
-    "superVsOpp": 0.411
+    "superVsOpp": 0.367
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": 0.004,
-    "ci95": 0.024,
-    "superVsOpp": 0.265
+    "extMinusSuper": -0.004,
+    "ci95": 0.025,
+    "superVsOpp": 0.254
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": 0.037,
-    "ci95": 0.024,
-    "superVsOpp": 0.275
+    "extMinusSuper": 0.042,
+    "ci95": 0.025,
+    "superVsOpp": 0.262
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": 0.03,
-    "ci95": 0.019,
-    "superVsOpp": 0.279
+    "extMinusSuper": 0.046,
+    "ci95": 0.02,
+    "superVsOpp": 0.258
    }
   ]
  },
@@ -49,31 +49,31 @@
     "rounds": "1-1",
     "extMinusSuper": 0,
     "ci95": 0,
-    "superVsOpp": 0.068
+    "superVsOpp": 0.048
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": -0.043,
-    "ci95": 0.027,
-    "superVsOpp": 0.11
+    "extMinusSuper": -0.013,
+    "ci95": 0.026,
+    "superVsOpp": 0.077
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": -0.021,
+    "extMinusSuper": -0.025,
     "ci95": 0.023,
-    "superVsOpp": -0.027
+    "superVsOpp": -0.023
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": -0.018,
+    "extMinusSuper": -0.005,
     "ci95": 0.021,
-    "superVsOpp": 0.005
+    "superVsOpp": 0.013
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": -0.011,
+    "extMinusSuper": -0.012,
     "ci95": 0.015,
-    "superVsOpp": -0.033
+    "superVsOpp": -0.034
    }
   ]
  },
@@ -88,31 +88,31 @@
     "rounds": "1-1",
     "extMinusSuper": 0,
     "ci95": 0,
-    "superVsOpp": 1.58
+    "superVsOpp": 1.62
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": 0.01,
-    "ci95": 0.026,
-    "superVsOpp": 1.506
+    "extMinusSuper": 0.011,
+    "ci95": 0.023,
+    "superVsOpp": 1.567
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": 0.114,
-    "ci95": 0.028,
-    "superVsOpp": 1.427
+    "extMinusSuper": 0.087,
+    "ci95": 0.026,
+    "superVsOpp": 1.478
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": 0.159,
-    "ci95": 0.028,
-    "superVsOpp": 1.401
+    "extMinusSuper": 0.157,
+    "ci95": 0.029,
+    "superVsOpp": 1.434
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": 0.25,
-    "ci95": 0.025,
-    "superVsOpp": 1.361
+    "extMinusSuper": 0.233,
+    "ci95": 0.024,
+    "superVsOpp": 1.407
    }
   ]
  },
@@ -126,33 +126,33 @@
   "rows": [
    {
     "rounds": "1-1",
-    "extMinusSuper": 0.048,
-    "ci95": 0.162,
-    "superVsOpp": 0.307
+    "extMinusSuper": 0.055,
+    "ci95": 0.189,
+    "superVsOpp": 0.188
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": -0.042,
-    "ci95": 0.104,
-    "superVsOpp": 0.541
+    "extMinusSuper": -0.078,
+    "ci95": 0.103,
+    "superVsOpp": 0.495
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": -0.006,
-    "ci95": 0.061,
-    "superVsOpp": 0.915
+    "extMinusSuper": 0.006,
+    "ci95": 0.064,
+    "superVsOpp": 0.871
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": 0.095,
-    "ci95": 0.057,
-    "superVsOpp": 0.498
+    "extMinusSuper": 0.137,
+    "ci95": 0.058,
+    "superVsOpp": 0.435
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": 0.161,
+    "extMinusSuper": 0.189,
     "ci95": 0.043,
-    "superVsOpp": 0.793
+    "superVsOpp": 0.753
    }
   ]
  },
@@ -167,32 +167,32 @@
    {
     "rounds": "1-1",
     "extMinusSuper": 0.003,
-    "ci95": 0.147,
-    "superVsOpp": -0.105
+    "ci95": 0.164,
+    "superVsOpp": -0.155
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": -0.029,
-    "ci95": 0.094,
-    "superVsOpp": -0.094
+    "extMinusSuper": -0.003,
+    "ci95": 0.098,
+    "superVsOpp": -0.102
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": -0.019,
-    "ci95": 0.059,
-    "superVsOpp": 0.073
+    "extMinusSuper": -0.004,
+    "ci95": 0.064,
+    "superVsOpp": 0.09
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": 0.002,
-    "ci95": 0.049,
-    "superVsOpp": -0.181
+    "extMinusSuper": 0.034,
+    "ci95": 0.053,
+    "superVsOpp": -0.204
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": 0.033,
-    "ci95": 0.037,
-    "superVsOpp": 0.134
+    "extMinusSuper": 0.044,
+    "ci95": 0.038,
+    "superVsOpp": 0.121
    }
   ]
  },
@@ -207,33 +207,33 @@
   "rows": [
    {
     "rounds": "1-1",
-    "extMinusSuper": -0.013,
-    "ci95": 0.146,
-    "superVsOpp": 0.657
+    "extMinusSuper": 0.072,
+    "ci95": 0.173,
+    "superVsOpp": 0.53
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": 0.066,
-    "ci95": 0.083,
-    "superVsOpp": 1.212
+    "extMinusSuper": 0.055,
+    "ci95": 0.08,
+    "superVsOpp": 1.143
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": 0.043,
-    "ci95": 0.065,
-    "superVsOpp": 0.902
+    "extMinusSuper": 0.06,
+    "ci95": 0.069,
+    "superVsOpp": 0.816
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": 0.159,
-    "ci95": 0.055,
-    "superVsOpp": 0.994
+    "extMinusSuper": 0.165,
+    "ci95": 0.059,
+    "superVsOpp": 0.954
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": 0.188,
-    "ci95": 0.046,
-    "superVsOpp": 0.918
+    "extMinusSuper": 0.226,
+    "ci95": 0.049,
+    "superVsOpp": 0.862
    }
   ]
  },
@@ -248,33 +248,33 @@
   "rows": [
    {
     "rounds": "1-1",
-    "extMinusSuper": -0.022,
-    "ci95": 0.14,
-    "superVsOpp": -0.065
+    "extMinusSuper": 0.133,
+    "ci95": 0.204,
+    "superVsOpp": -0.198
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": 0.019,
-    "ci95": 0.079,
-    "superVsOpp": 0.267
+    "extMinusSuper": 0.056,
+    "ci95": 0.078,
+    "superVsOpp": 0.22
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": -0.004,
-    "ci95": 0.066,
-    "superVsOpp": -0.14
+    "extMinusSuper": 0.029,
+    "ci95": 0.067,
+    "superVsOpp": -0.163
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": -0.011,
-    "ci95": 0.047,
-    "superVsOpp": 0.09
+    "extMinusSuper": -0.028,
+    "ci95": 0.045,
+    "superVsOpp": 0.075
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": 0.014,
+    "extMinusSuper": 0.016,
     "ci95": 0.035,
-    "superVsOpp": -0.008
+    "superVsOpp": -0.029
    }
   ]
  },
@@ -289,33 +289,33 @@
   "rows": [
    {
     "rounds": "1-1",
-    "extMinusSuper": 0.013,
-    "ci95": 0.205,
-    "superVsOpp": 1.673
+    "extMinusSuper": 0.06,
+    "ci95": 0.191,
+    "superVsOpp": 1.7
    },
    {
     "rounds": "2-5",
-    "extMinusSuper": 0.052,
-    "ci95": 0.09,
-    "superVsOpp": 2.07
+    "extMinusSuper": 0.032,
+    "ci95": 0.087,
+    "superVsOpp": 2.1
    },
    {
     "rounds": "6-15",
-    "extMinusSuper": 0.033,
-    "ci95": 0.058,
-    "superVsOpp": 1.589
+    "extMinusSuper": 0.034,
+    "ci95": 0.062,
+    "superVsOpp": 1.599
    },
    {
     "rounds": "16-30",
-    "extMinusSuper": 0.048,
-    "ci95": 0.049,
-    "superVsOpp": 1.791
+    "extMinusSuper": 0.025,
+    "ci95": 0.048,
+    "superVsOpp": 1.846
    },
    {
     "rounds": "31-60",
-    "extMinusSuper": 0.06,
+    "extMinusSuper": 0.084,
     "ci95": 0.039,
-    "superVsOpp": 1.804
+    "superVsOpp": 1.828
    }
   ]
  }

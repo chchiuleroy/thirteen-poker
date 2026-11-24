@@ -246,7 +246,7 @@
     const left = trayCards().length;
     if (left) { s.className = 'status'; s.textContent = S.sel.size ? `已選 ${S.sel.size} 張：按上面的「放入○墩」，或直接點要放的墩。` : `還有 ${left} 張牌沒放：點牌可多選（也可拖曳劃選），再選要放的墩。`; return; }
     const v = E.valuesOf(currentArrangement());
-    if (E.frontFoul(v[0], v[1])) { s.className = 'status warn'; s.textContent = '倒水：頭墩必須比中墩小（不能一樣大或更大），請調整（頭墩 < 中墩 ≤ 尾墩）。'; }
+    if (E.frontFoul(v[0], v[1])) { s.className = 'status warn'; s.textContent = '倒水：頭墩必須比中墩小（點數相同比花色，連花色都一樣也算倒水），請調整（頭墩 < 中墩 ≤ 尾墩）。'; }
     else if (v[1] > v[2]) { s.className = 'status warn'; s.textContent = '倒水：中墩比尾墩大了，請調整（頭墩 < 中墩 ≤ 尾墩）。'; }
     else if (!S.aiReady) { s.className = 'status'; s.textContent = '等電腦擺好牌…'; }
     else { s.className = 'status ok'; s.textContent = '擺法合法，可以攤牌。'; }

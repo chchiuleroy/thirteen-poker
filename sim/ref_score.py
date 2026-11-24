@@ -19,23 +19,30 @@ def lane_values(arr):
     return [brute(arr['front']), brute(arr['mid']), brute(arr['back'])]
 
 
-FRONT_DIGITS = {0: 3, 1: 2, 3: 1}  # 頭墩牌型實際比較的位數：烏龍 3、一對 2（對子+踢腳）、三條 1
+FRONT_DIGITS = {0: 3, 1: 2, 3: 1}  # 頭墩牌型實際比較的點數位數：烏龍 3、一對 2（對子+踢腳）、三條 1
 
 
-def digits(v):
-    out = []
+def decode(v):
+    """牌力值 -> (牌型階級, 點數鍵 [t0..t4], 花色鍵 [s0..s4])；v = (點數部分) * 1024 + 花色鍵"""
+    sk, rp = v % 1024, v // 1024
+    suits = []
     for _ in range(5):
-        out.append(v % 15)
-        v //= 15
-    return v, out[::-1]  # (牌型階級, [t0..t4])
+        suits.append(sk % 4)
+        sk //= 4
+    ranks = []
+    for _ in range(5):
+        ranks.append(rp % 15)
+        rp //= 15
+    return rp, ranks[::-1], suits[::-1]
 
 
 def is_foul(v):
-    # 依 docs/RULES.md：頭 < 中 ≤ 尾；頭墩只比自己有的那幾位，3 張能比的部分相同算平手＝倒水
-    cf, tf = digits(v[0])
-    cm, tm = digits(v[1])
+    # 依 docs/RULES.md：頭 < 中 ≤ 尾。頭墩只比自己有的點數位數，點數相同再比前 3 張牌的花色（決勝順序、♠>♥>♦>♣）；
+    # 點數與花色都相同＝平手＝倒水。
+    cf, tf, sf = decode(v[0])
+    cm, tm, sm = decode(v[1])
     k = FRONT_DIGITS[cf]
-    front_below = cf < cm or (cf == cm and tf[:k] < tm[:k])
+    front_below = cf < cm or (cf == cm and (tf[:k], sf[:3]) < (tm[:k], sm[:3]))
     return (not front_below) or v[1] > v[2]
 
 
@@ -75,9 +82,9 @@ def score_table(vals):
             bonus = 0
             for k in range(3):
                 if lane_res[i][j][k] == 1 and not foul[i]:
-                    bonus += BONUS.get((lanes[k], vals[i][k] // B5), 0)
+                    bonus += BONUS.get((lanes[k], decode(vals[i][k])[0]), 0)
                 elif lane_res[i][j][k] == -1 and not foul[j]:
-                    bonus -= BONUS.get((lanes[k], vals[j][k] // B5), 0)
+                    bonus -= BONUS.get((lanes[k], decode(vals[j][k])[0]), 0)
             totals[i] += base + bonus
     return totals, homerun, foul
 

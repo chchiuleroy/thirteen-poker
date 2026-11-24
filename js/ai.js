@@ -31,7 +31,7 @@
 
   /** 預先評價 13 張牌所有 5 張／3 張子集的牌力值 */
   function prep(hand) {
-    const v5 = new Int32Array(8192), v3 = new Int32Array(8192);
+    const v5 = new Float64Array(8192), v3 = new Float64Array(8192); // 牌力值含花色鍵，超過 int32
     for (let q = 0; q < MASK5.length; q++) {
       const m = MASK5[q]; let k = 0;
       for (let i = 0; i < 13; i++) if ((m >> i) & 1) b5[k++] = hand[i];
@@ -42,15 +42,17 @@
       for (let i = 0; i < 13; i++) if ((m >> i) & 1) b3[k++] = hand[i];
       v3[m] = E.eval3(b3);
     }
-    const fu = new Int32Array(8192); // 頭墩各子集的「與中墩比較的位數單位」，見 engine.frontFoul
+    const fu = new Int32Array(8192); // 頭墩各子集的「與中墩比較的點數位數單位」，見 engine.frontFoul
     for (let q = 0; q < MASK3.length; q++) { const m = MASK3[q]; fu[m] = E.FRONT_UNIT[E.catOf(v3[m])]; }
-    return { hand, v5, v3, fu };
+    const rp = new Float64Array(8192), sk = new Int32Array(8192); // 5 張子集：點數部分／花色鍵
+    for (let q = 0; q < MASK5.length; q++) { const m = MASK5[q]; rp[m] = Math.floor(v5[m] / E.SK); sk[m] = v5[m] - rp[m] * E.SK; }
+    return { hand, v5, v3, fu, rp, sk };
   }
 
   /** 列舉所有合法（不倒水）擺法；cb(back, mid, front) */
   const idx8 = new Int32Array(8);
   function forEachLegal(p, cb) {
-    const v5 = p.v5, v3 = p.v3, fu = p.fu;
+    const v5 = p.v5, v3 = p.v3, fu = p.fu, rp = p.rp, sk = p.sk, SK = E.SK, SM = E.FRONT_SUIT_MASK;
     for (let bi = 0; bi < MASK5.length; bi++) {
       const back = MASK5[bi], vb = v5[back];
       const rem = FULL ^ back;
@@ -63,7 +65,7 @@
         if (vm > vb) continue;
         const front = rem ^ mid;
         const u = fu[front];
-        if (!(v3[front] < Math.floor(vm / u) * u)) continue; // 頭墩必須嚴格小於中墩（同 engine.frontFoul）
+        if (!(v3[front] < Math.floor(rp[mid] / u) * u * SK + (sk[mid] & SM))) continue; // 頭墩必須嚴格小於中墩（同 engine.frontFoul，含花色）
         cb(back, mid, front);
       }
     }
@@ -101,8 +103,9 @@
   // 權重由 sim/tune_hard.js（HL 迴圈）校準：起點 {1,1,1,0.30,0.05}，對起點的驗證得分 +0.50 ±0.03（N=2）、+1.45 ±0.05（N=4），見 docs/HL_LOG.md
   const DEFAULT_HARD = { wf: 1.96, wm: 0.7, wb: 1.96, r0: 0.42, r1: 0.035 };
   function laneScoreHeur(v, prm) {
-    const cat = Math.floor(v / E.B5);
-    const rest = v - cat * E.B5;
+    const rpart = E.rankPart(v);
+    const cat = Math.floor(rpart / E.B5);
+    const rest = rpart - cat * E.B5;
     const t0 = Math.floor(rest / 50625) % 15;
     const t1 = Math.floor(rest / 3375) % 15;
     return cat + prm.r0 * (t0 / 14) + prm.r1 * (t1 / 14);

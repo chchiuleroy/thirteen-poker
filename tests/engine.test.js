@@ -213,22 +213,67 @@ test('hard 與 greedy 在已知牌上的選擇：能湊五條就把五條放尾�
   }
 });
 
-test('頭墩嚴格小於中墩：3 張能比的部分相同就算平手 → 倒水（含多副牌的相同牌）', () => {
+test('頭墩嚴格小於中墩：點數相同時比花色，花色也相同（多副牌的同一張牌）才算平手 → 倒水', () => {
   const back = E.evalLane([C(14, 0), C(14, 1), C(14, 2), C(3, 1), C(3, 2)]); // 尾墩葫蘆，夠大
-  const frontAAK = E.evalLane([C(14, 0), C(14, 1), C(13, 2)]);
-  // 頭 A-A-K 對中 A-A-K-Q-J：頭墩那 3 張的部分相同 → 平手 → 倒水
-  assert.equal(E.isFoul(frontAAK, E.evalLane([C(14, 2), C(14, 3), C(13, 0), C(12, 1), C(11, 2)]), back), true);
-  // 頭 A-A-K 對中 A-A-Q-J-9：頭墩較大 → 倒水
-  assert.equal(E.isFoul(frontAAK, E.evalLane([C(14, 2), C(14, 3), C(12, 0), C(11, 1), C(9, 2)]), back), true);
-  // 頭 A-A-3 對中 A-A-9-8-7：頭墩較小 → 合法
-  assert.equal(E.isFoul(E.evalLane([C(14, 0), C(14, 1), C(3, 2)]), E.evalLane([C(14, 2), C(14, 3), C(9, 0), C(8, 1), C(7, 2)]), back), false);
-  // 三條只比點數：頭 999 對中 999-x-y → 平手 → 倒水；頭 888 對中 999-x-y → 合法
-  assert.equal(E.isFoul(E.evalLane([C(9, 0), C(9, 1), C(9, 2)]), E.evalLane([C(9, 3), C(9, 0), C(9, 1), C(4, 2), C(2, 3)]), back), true);
-  assert.equal(E.isFoul(E.evalLane([C(8, 0), C(8, 1), C(8, 2)]), E.evalLane([C(9, 3), C(9, 0), C(9, 1), C(4, 2), C(2, 3)]), back), false);
-  // 烏龍：頭 A-K-9 對中 A-K-9-4-2 → 平手 → 倒水；頭 A-K-8 對中 A-K-9-4-2 → 合法
-  assert.equal(E.isFoul(E.evalLane([C(14, 0), C(13, 1), C(9, 2)]), E.evalLane([C(14, 1), C(13, 2), C(9, 3), C(4, 0), C(2, 1)]), back), true);
-  assert.equal(E.isFoul(E.evalLane([C(14, 0), C(13, 1), C(8, 2)]), E.evalLane([C(14, 1), C(13, 2), C(9, 3), C(4, 0), C(2, 1)]), back), false);
+  const S = { club: 0, dia: 1, heart: 2, spade: 3 };
+  // 頭 A♣ A♦ K♥（決勝花色：對子 ♦♣、踢腳 ♥）
+  const front = E.evalLane([C(14, S.club), C(14, S.dia), C(13, S.heart)]);
+  // 中 A♠ A♥ K♦ Q J：點數前 3 張相同，花色對子 ♠♥ > ♦♣ → 頭墩較小 → 合法
+  assert.equal(E.isFoul(front, E.evalLane([C(14, 3), C(14, 2), C(13, 1), C(12, 0), C(11, 0)]), back), false);
+  // 中 A♦ A♣ K♥ Q J：花色完全相同 → 平手 → 倒水
+  assert.equal(E.isFoul(front, E.evalLane([C(14, 1), C(14, 0), C(13, 2), C(12, 0), C(11, 0)]), back), true);
+  // 中 A♣ A♣ K♣ Q J（多副牌才有同一張牌）：花色 ♣♣ 比 ♦♣ 小 → 頭墩較大 → 倒水
+  assert.equal(E.isFoul(front, E.evalLane([C(14, 0), C(14, 0), C(13, 0), C(12, 3), C(11, 3)]), back), true);
+  // 點數不同仍然點數優先：頭 A-A-K 對中 A-A-Q-J-9（即使中墩花色全是 ♠）→ 頭墩較大 → 倒水
+  assert.equal(E.isFoul(front, E.evalLane([C(14, 3), C(14, 2), C(12, 3), C(11, 3), C(9, 3)]), back), true);
+  // 頭 A-A-3 對中 A-A-9-8-7：點數頭墩較小 → 合法（不管花色）
+  assert.equal(E.isFoul(E.evalLane([C(14, 3), C(14, 2), C(3, 3)]), E.evalLane([C(14, 0), C(14, 1), C(9, 0), C(8, 0), C(7, 0)]), back), false);
+  // 三條只比點數：頭 999 對中 999-x-y → 比花色：頭 ♠♥♦ vs 中 ♣♣♣ → 頭墩較大 → 倒水；頭 ♣♣♣ vs 中 ♠♥♦ → 合法
+  const midT = (s) => E.evalLane([C(9, s[0]), C(9, s[1]), C(9, s[2]), C(4, 0), C(2, 1)]);
+  assert.equal(E.isFoul(E.evalLane([C(9, 3), C(9, 2), C(9, 1)]), midT([0, 0, 0]), back), true);
+  assert.equal(E.isFoul(E.evalLane([C(9, 0), C(9, 0), C(9, 0)]), midT([3, 2, 1]), back), false);
+  // 烏龍：頭 A-K-9 對中 A-K-9-4-2：決勝花色逐張比（A 的花色先比）
+  const midH = (sa, sk) => E.evalLane([C(14, sa), C(13, sk), C(9, 0), C(4, 1), C(2, 2)]);
+  assert.equal(E.isFoul(E.evalLane([C(14, 2), C(13, 3), C(9, 1)]), midH(3, 0), back), false); // A♥ < A♠
+  assert.equal(E.isFoul(E.evalLane([C(14, 3), C(13, 0), C(9, 1)]), midH(2, 3), back), true);  // A♠ > A♥
   // 中墩可以等於尾墩
   const mid = E.evalLane([C(6, 0), C(6, 1), C(2, 2), C(4, 3), C(9, 0)]);
   assert.equal(E.isFoul(E.evalLane([C(3, 0), C(3, 1), C(2, 3)]), mid, mid), false);
+});
+
+test('花色決勝：點數完全相同才比花色，♠ > ♥ > ♦ > ♣，依決勝順序逐張比', () => {
+  const S = { club: 0, dia: 1, heart: 2, spade: 3 };
+  const high = (sa) => E.evalLane([C(14, sa), C(13, 0), C(9, 1), C(4, 2), C(2, 0)]); // 烏龍 A 高（非同花）
+  assert.ok(high(S.spade) > high(S.heart) && high(S.heart) > high(S.dia) && high(S.dia) > high(S.club));
+  // 點數優先：A♣ 高 > K♠ 高（花色不能蓋過點數）
+  assert.ok(E.evalLane([C(14, 0), C(9, 3), C(7, 3), C(4, 3), C(2, 0)]) > E.evalLane([C(13, 3), C(9, 3), C(7, 3), C(4, 3), C(2, 0)]));
+  // 同花：花色決勝（點數全同）
+  const fl = (s) => E.evalLane([C(14, s), C(11, s), C(9, s), C(6, s), C(3, s)]);
+  assert.ok(fl(3) > fl(2) && fl(2) > fl(1) && fl(1) > fl(0));
+  // 同花點數較大仍贏：K 高同花 ♣ < A 高同花 ♦ 是點數決定；A 高 ♦ 與 A 高 ♠ 則比花色
+  assert.ok(fl(1) < fl(3));
+  // 順子／同花順比頂牌花色；輪子 A2345 的「頂牌」是 5
+  const sf = (s) => E.evalLane([C(5, s), C(6, s), C(7, s), C(8, s), C(9, s)]);
+  assert.ok(sf(3) > sf(0));
+  // 一對：先比對子兩張的花色（大者在前）再比踢腳；對子 ♠♣ vs ♥♦：第一張 ♠ > ♥
+  const pair = (s1, s2) => E.evalLane([C(9, s1), C(9, s2), C(14, 0), C(7, 1), C(3, 2)]);
+  assert.ok(pair(3, 0) > pair(2, 1));
+  // 葫蘆：先比三條的花色、再比對子的花色
+  const fh = (t, p) => E.evalLane([C(9, t[0]), C(9, t[1]), C(9, t[2]), C(4, p[0]), C(4, p[1])]);
+  assert.ok(fh([3, 2, 1], [0, 0]) > fh([3, 2, 0], [3, 3]));
+  // 鬼牌的花色：一般情況當 ♠（最大）；同花／同花順必須跟著同花色
+  const withJoker = E.evalLane([C(9, 0), C(9, 1), E.JOKER, C(14, 0), C(7, 1)]);       // 三條 9（鬼=♠）
+  const withNat = E.evalLane([C(9, 0), C(9, 1), C(9, 2), C(14, 0), C(7, 1)]);         // 三條 9（♥）
+  assert.ok(withJoker > withNat);
+  const jf = E.evalLane([E.JOKER, C(14, 0), C(11, 0), C(9, 0), C(6, 0)]);              // 同花 ♣：鬼牌必須是 ♣（填 A）
+  assert.equal(E.catOf(jf), E.CAT.FLUSH);
+  assert.equal(jf, E.evalLane([C(14, 0), C(14, 0), C(11, 0), C(9, 0), C(6, 0)]));      // 等同「A♣ A♣ J♣ 9♣ 6♣」，鬼牌沒有變成 ♠
+});
+
+test('玩家之間比牌：點數同牌型時由花色分勝負，不再平手；完全相同的牌才平手', () => {
+  const mk = (sa) => ({ front: [C(3, 0), C(5, 1), C(7, 2)], mid: [C(2, 1), C(6, 2), C(8, 3), C(10, 0), C(13, 1)], back: [C(4, 0), C(9, 2), C(11, 3), C(12, 1), C(sa === 3 ? 14 : 14, sa)] });
+  const r = E.scoreRound([mk(3), mk(2)]);
+  // 三墩除了尾墩 A 的花色外完全相同：頭、中墩完全一樣＝平手，尾墩 ♠A > ♥A → +1
+  assert.deepEqual(r.totals, [1, -1]);
+  assert.deepEqual(E.scoreRound([mk(3), mk(3)]).totals, [0, 0]); // 完全相同 → 平手
 });

@@ -1,7 +1,8 @@
 /* 十三支規則引擎（瀏覽器與 Node 共用）
  *
  * 牌的編碼：0..51 = 一般牌，rank = (c>>2)+2（2..14，14=A），suit = c&3（0♣ 1♦ 2♥ 3♠）；52 = 鬼牌（可當任意牌）。
- * 牌墩（lane）的「牌力值」是單一整數：cat*15^5 + t0*15^4 + ... + t4，可直接比大小。
+ * 牌墩（lane）的「牌力值」是單一整數：(cat*15^5 + t0*15^4 + ... + t4) * 1024 + 花色鍵，可直接比大小。
+ * 點數優先；點數完全相同才依決勝順序逐張比花色（♠ > ♥ > ♦ > ♣）。
  * 規則細節與計分表見 docs/RULES.md。
  */
 (function (root, factory) {
@@ -15,16 +16,26 @@
   const CAT_NAME = ['烏龍', '一對', '兩對', '三條', '順子', '同花', '葫蘆', '鐵支', '同花順', '五條'];
   const RANK_NAME = { 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '10', 11: 'J', 12: 'Q', 13: 'K', 14: 'A' };
   const SUIT_CHAR = ['♣', '♦', '♥', '♠'];
-  const B5 = 759375; // 15^5
+  const B5 = 759375; // 15^5：牌型階級在「點數部分」中的位值
+  const SK = 1024;   // 花色部分占 10 bits（最多 5 張牌 × 2 bits）；牌力值 = 點數部分 * 1024 + 花色部分
+  const CATB = B5 * SK; // 牌型階級的位值（= 777,600,000）
 
+  /** 只含點數部分的牌力值（花色部分為 0） */
   function V(cat, a, b, c, d, e) {
-    return ((((cat * 15 + a) * 15 + b) * 15 + c) * 15 + d) * 15 + e;
+    return (((((cat * 15 + a) * 15 + b) * 15 + c) * 15 + d) * 15 + e) * SK;
   }
-  const catOf = (v) => Math.floor(v / B5);
+  const catOf = (v) => Math.floor(v / CATB);
+  const rankPart = (v) => Math.floor(v / SK);
 
   // ---- 牌墩評價（鬼牌 = 任意牌，含與手上重複的牌，因為多副牌）----
+  // 牌力值 = (牌型, 點數) 先比；點數完全相同才比花色：依「該牌型的決勝順序」逐張比，花色 ♠(3) > ♥(2) > ♦(1) > ♣(0)。
+  // 鬼牌的花色：同花／同花順必須跟著同花色，其餘一律當 ♠（最大）。
   const cnt = new Int8Array(15);
   const nat = new Int8Array(8);
+  const nr = new Int8Array(5), ns = new Int8Array(5); // 自然牌（點數、花色）
+  const dl = new Int8Array(5);                         // 決勝順序下每張牌的點數
+  const tmpS = new Int8Array(5);
+  let nN = 0;
 
   function windowMask(t) { // 順子視窗：頂牌 t（5 = A2345）
     if (t === 5) return (1 << 14) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
@@ -37,31 +48,53 @@
     return 0;
   }
 
+  /** 依決勝順序 dl[0..size) 排出花色鍵（每張 2 bits，第一張在最高位，不足 5 張右側補 0）。forced>=0：鬼牌強制用該花色 */
+  function suitKey(size, forced) {
+    let key = 0, p = 0;
+    const jokerSuit = forced >= 0 ? forced : 3;
+    while (p < size) {
+      const q = dl[p];
+      let e = p + 1;
+      while (e < size && dl[e] === q) e++;
+      let m = 0;
+      for (let i = 0; i < nN; i++) if (nr[i] === q) tmpS[m++] = ns[i];
+      for (let k = m; k < e - p; k++) tmpS[k] = jokerSuit;
+      for (let a = 1; a < e - p; a++) { const x = tmpS[a]; let b = a - 1; while (b >= 0 && tmpS[b] < x) { tmpS[b + 1] = tmpS[b]; b--; } tmpS[b + 1] = x; } // 由大到小
+      for (let k = 0; k < e - p; k++) key = key * 4 + tmpS[k];
+      p = e;
+    }
+    for (let k = size; k < 5; k++) key *= 4;
+    return key;
+  }
+  function straightList(t) { if (t === 5) { dl[0] = 5; dl[1] = 4; dl[2] = 3; dl[3] = 2; dl[4] = 14; } else for (let k = 0; k < 5; k++) dl[k] = t - k; }
+
   /** 3 張牌（頭墩）：只有 烏龍 / 一對 / 三條（3 張不算順、花） */
   function eval3(cards) {
     cnt.fill(0);
-    let j = 0;
+    let j = 0; nN = 0;
     for (let i = 0; i < 3; i++) {
       const c = cards[i];
-      if (c === JOKER) j++; else cnt[(c >> 2) + 2]++;
+      if (c === JOKER) j++; else { const r = (c >> 2) + 2; cnt[r]++; nr[nN] = r; ns[nN] = c & 3; nN++; }
     }
-    for (let r = 14; r >= 2; r--) if (cnt[r] <= 3 && cnt[r] + j >= 3) return V(CAT.TRIPS, r, 0, 0, 0, 0);
+    for (let r = 14; r >= 2; r--) if (cnt[r] <= 3 && cnt[r] + j >= 3) { dl[0] = dl[1] = dl[2] = r; return V(CAT.TRIPS, r, 0, 0, 0, 0) + suitKey(3, -1); }
     for (let r = 14; r >= 2; r--) {
       if (cnt[r] <= 2 && cnt[r] + j >= 2) {
         let k = 0;
         for (let q = 14; q >= 2; q--) if (q !== r && cnt[q] > 0) { k = q; break; }
-        return V(CAT.PAIR, r, k, 0, 0, 0);
+        dl[0] = dl[1] = r; dl[2] = k;
+        return V(CAT.PAIR, r, k, 0, 0, 0) + suitKey(3, -1);
       }
     }
-    const a = [];
-    for (let q = 14; q >= 2; q--) for (let m = cnt[q]; m > 0; m--) a.push(q);
-    return V(CAT.HIGH, a[0], a[1], a[2], 0, 0);
+    let k = 0;
+    for (let q = 14; q >= 2; q--) for (let m = cnt[q]; m > 0; m--) dl[k++] = q;
+    return V(CAT.HIGH, dl[0], dl[1], dl[2], 0, 0) + suitKey(3, -1);
   }
 
   /** 5 張牌（中墩、尾墩） */
   function eval5(cards) {
     cnt.fill(0);
     let j = 0, distinct = 0, s0 = -1, sameSuit = true, maxCnt = 0, mask = 0, top = 0;
+    nN = 0;
     for (let i = 0; i < 5; i++) {
       const c = cards[i];
       if (c === JOKER) { j++; continue; }
@@ -71,16 +104,17 @@
       if (cnt[r] > maxCnt) maxCnt = cnt[r];
       if (r > top) top = r;
       if (s0 < 0) s0 = s; else if (s !== s0) sameSuit = false;
+      nr[nN] = r; ns[nN] = s; nN++;
     }
     const n = 5 - j;
 
     // 五條：5 張同點數（多副牌 + 鬼牌才可能）
-    if (distinct <= 1) return V(CAT.FIVE, distinct === 1 ? top : 14, 0, 0, 0, 0);
+    if (distinct <= 1) { const r = distinct === 1 ? top : 14; dl[0] = dl[1] = dl[2] = dl[3] = dl[4] = r; return V(CAT.FIVE, r, 0, 0, 0, 0) + suitKey(5, -1); }
 
     // 同花順
     if (sameSuit && maxCnt <= 1) {
       const t = bestStraightTop(mask);
-      if (t) return V(CAT.STRAIGHT_FLUSH, t, 0, 0, 0, 0);
+      if (t) { straightList(t); return V(CAT.STRAIGHT_FLUSH, t, 0, 0, 0, 0) + suitKey(5, s0); }
     }
 
     // 鐵支
@@ -88,7 +122,8 @@
       if (cnt[r] <= 4 && cnt[r] + j >= 4 && n - cnt[r] <= 1) {
         let k = 0;
         for (let q = 14; q >= 2; q--) if (q !== r && cnt[q] > 0) { k = q; break; }
-        return V(CAT.QUAD, r, k, 0, 0, 0);
+        dl[0] = dl[1] = dl[2] = dl[3] = r; dl[4] = k;
+        return V(CAT.QUAD, r, k, 0, 0, 0) + suitKey(5, -1);
       }
     }
 
@@ -102,7 +137,7 @@
         for (let b = 0; b < cand.length; b++) {
           const P = cand[b];
           if (P === T || cnt[P] > 2) continue;
-          if (n === cnt[T] + cnt[P]) return V(CAT.FULL_HOUSE, T, P, 0, 0, 0);
+          if (n === cnt[T] + cnt[P]) { dl[0] = dl[1] = dl[2] = T; dl[3] = dl[4] = P; return V(CAT.FULL_HOUSE, T, P, 0, 0, 0) + suitKey(5, -1); }
         }
       }
     }
@@ -115,13 +150,14 @@
       for (let i = 0; i < j; i++) a.push(14);
       for (let i = 0; i < k; i++) a.push(nat[i]);
       a.sort((x, y) => y - x);
-      return V(CAT.FLUSH, a[0], a[1], a[2], a[3], a[4]);
+      for (let i = 0; i < 5; i++) dl[i] = a[i];
+      return V(CAT.FLUSH, a[0], a[1], a[2], a[3], a[4]) + suitKey(5, s0);
     }
 
     // 順子
     if (maxCnt <= 1) {
       const t = bestStraightTop(mask);
-      if (t) return V(CAT.STRAIGHT, t, 0, 0, 0, 0);
+      if (t) { straightList(t); return V(CAT.STRAIGHT, t, 0, 0, 0, 0) + suitKey(5, -1); }
     }
 
     // 三條
@@ -130,7 +166,8 @@
         const ks = [];
         for (let q = 14; q >= 2; q--) if (q !== r) for (let m = cnt[q]; m > 0; m--) ks.push(q);
         while (ks.length < 2) ks.push(14);
-        return V(CAT.TRIPS, r, ks[0], ks[1], 0, 0);
+        dl[0] = dl[1] = dl[2] = r; dl[3] = ks[0]; dl[4] = ks[1];
+        return V(CAT.TRIPS, r, ks[0], ks[1], 0, 0) + suitKey(5, -1);
       }
     }
 
@@ -141,7 +178,7 @@
         if (cnt[q] === 2) { if (!p1) p1 = q; else p2 = q; }
         else if (cnt[q] === 1 && !k) k = q;
       }
-      if (p1 && p2) return V(CAT.TWO_PAIR, p1, p2, k, 0, 0);
+      if (p1 && p2) { dl[0] = dl[1] = p1; dl[2] = dl[3] = p2; dl[4] = k; return V(CAT.TWO_PAIR, p1, p2, k, 0, 0) + suitKey(5, -1); }
     }
 
     // 一對
@@ -149,15 +186,16 @@
       if (cnt[r] <= 2 && cnt[r] + j >= 2) {
         const ks = [];
         for (let q = 14; q >= 2; q--) if (q !== r) for (let m = cnt[q]; m > 0; m--) ks.push(q);
-        return V(CAT.PAIR, r, ks[0], ks[1], ks[2], 0);
+        dl[0] = dl[1] = r; dl[2] = ks[0]; dl[3] = ks[1]; dl[4] = ks[2];
+        return V(CAT.PAIR, r, ks[0], ks[1], ks[2], 0) + suitKey(5, -1);
       }
     }
 
     // 烏龍
     {
-      const a = [];
-      for (let q = 14; q >= 2; q--) for (let m = cnt[q]; m > 0; m--) a.push(q);
-      return V(CAT.HIGH, a[0], a[1], a[2], a[3], a[4]);
+      let k = 0;
+      for (let q = 14; q >= 2; q--) for (let m = cnt[q]; m > 0; m--) dl[k++] = q;
+      return V(CAT.HIGH, dl[0], dl[1], dl[2], dl[3], dl[4]) + suitKey(5, -1);
     }
   }
 
@@ -165,7 +203,7 @@
 
   function laneName(v) {
     const cat = catOf(v);
-    let rest = v - cat * B5;
+    let rest = rankPart(v) - cat * B5;
     const t = [0, 0, 0, 0, 0];
     for (let i = 4; i >= 0; i--) { t[i] = rest % 15; rest = Math.floor(rest / 15); }
     const R = (x) => RANK_NAME[x] || '?';
@@ -194,13 +232,16 @@
   const LANE_KEYS = ['front', 'mid', 'back'];
   function laneBonus(lane, v) { return BONUS[LANE_KEYS[lane]][catOf(v)] || 0; }
 
-  /** 由三墩牌力值判斷是否倒水（必須 front ≤ mid ≤ back） */
-  // 頭墩（3 張）與中墩（5 張）怎麼比：只看頭墩牌型「有的那幾位」——烏龍比前 3 張、一對比 (對子, 踢腳)、三條只比點數。
-  // 頭墩必須「嚴格小於」中墩：例如頭 A-A-K 對中 A-A-K-Q-J，3 張能比的部分相同 → 算平手 → 倒水。
-  const FRONT_UNIT = { 0: 225, 1: 3375, 3: 50625 }; // 頭墩牌型保留的位數對應的單位（15^2、15^3、15^4）
+  /** 由三墩牌力值判斷是否倒水（必須 頭 < 中 ≤ 尾；頭墩對中墩的比法見 frontFoul） */
+  // 頭墩（3 張）與中墩（5 張）怎麼比：只看頭墩「有的那幾張」——烏龍比前 3 張、一對比（對子, 踢腳）、三條只比點數；
+  // 點數部分相同時，再比這 3 張牌的花色（依決勝順序逐張比，♠ > ♥ > ♦ > ♣）。
+  // 頭墩必須「嚴格小於」中墩：點數與花色都相同（只有多副牌才可能出現相同的牌）才算平手 → 倒水。
+  const FRONT_UNIT = { 0: 225, 1: 3375, 3: 50625 }; // 頭墩牌型保留的點數位數對應的單位（15^2、15^3、15^4）
+  const FRONT_SUIT_MASK = 0x3F0;                      // 花色鍵的前 3 張（bits 9..4）
   function frontFoul(vf, vm) {
     const u = FRONT_UNIT[catOf(vf)];
-    return !(vf < Math.floor(vm / u) * u);
+    const rp = Math.floor(vm / SK), sk = vm - rp * SK;
+    return !(vf < Math.floor(rp / u) * u * SK + (sk & FRONT_SUIT_MASK));
   }
   /** 倒水 = 頭墩沒有嚴格小於中墩，或中墩大於尾墩（尾墩可等於中墩） */
   const isFoul = (vf, vm, vb) => frontFoul(vf, vm) || vm > vb;
@@ -293,7 +334,7 @@
 
   return {
     JOKER, CAT, CAT_NAME, RANK_NAME, SUIT_CHAR, BONUS, B5,
-    V, catOf, eval3, eval5, evalLane, laneName, laneBonus, isFoul, frontFoul, FRONT_UNIT,
+    V, catOf, eval3, eval5, evalLane, laneName, laneBonus, isFoul, frontFoul, FRONT_UNIT, FRONT_SUIT_MASK, SK, CATB, rankPart,
     scoreValues, scoreRound, valuesOf,
     mulberry32, makeShoe, shuffle, deal, cardLabel,
   };
