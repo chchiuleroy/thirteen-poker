@@ -145,3 +145,9 @@ dialog p, dialog li { font-size: .88rem; }
 .selcount { font-weight: 700; min-width: 4.8em; color: var(--accent); }
 .selbar button:disabled { opacity: .4; cursor: not-allowed; }
 .card { touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+
+/* 本局結算（標題列與計分板之間） */
+.result-bar { border-color: var(--accent); }
+.result-bar h2 { margin: 0 0 8px; }
+.result-bar .rv-notes { font-size: .9rem; color: var(--ink); line-height: 1.7; }
+.result-bar .rv-actions { margin-top: 10px; }

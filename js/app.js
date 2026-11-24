@@ -72,7 +72,7 @@
     S.hands = E.deal(S.n, rng);
     S.loc = new Array(13).fill('tray');
     S.sel.clear(); S.phase = 'arrange'; S.aiReady = false; S.aiArr = [];
-    $('reveal').hidden = true; $('panel-you').hidden = false;
+    $('reveal').hidden = true; $('result-bar').hidden = true; $('panel-you').hidden = false;
     $('seed-info').textContent = `第 ${S.round} 局牌局種子 #${S.seed}（相同種子會發出相同的牌）`;
     $('round-title').textContent = `第 ${S.round} 局`;
     sortTray();
@@ -269,7 +269,7 @@
     $('panel-you').hidden = true;
     updateStatus();
     $('btn-confirm').disabled = true;
-    $('reveal').scrollIntoView({ block: 'start' });
+    window.scrollTo({ top: 0 }); // 結算與「下一局」在最上方（標題列和計分板之間）
   }
 
   function fmt(n) { return (n > 0 ? '+' : '') + n; }
@@ -294,7 +294,7 @@
 
   function renderReveal(arrs, vals, sc) {
     const box = $('reveal'); box.hidden = false; box.textContent = '';
-    box.appendChild(el('h2', '', `第 ${S.round} 局結果`));
+    box.appendChild(el('h2', '', `第 ${S.round} 局各家牌墩`));
     for (let s = 0; s < S.n; s++) {
       const p = el('div', 'rv-player');
       const head = el('div', 'rv-head');
@@ -316,15 +316,18 @@
       });
       box.appendChild(p);
     }
+    // 本局結算（對每位對手的勝負明細）與「下一局」放在最上方：標題列與計分板之間
+    const bar = $('result-bar'); bar.textContent = ''; bar.hidden = false;
+    bar.appendChild(el('h2', '', `第 ${S.round} 局結算`));
     const notes = el('div', 'rv-notes');
     for (let j = 1; j < S.n; j++) notes.appendChild(el('div', '', pairNote(sc, vals, j)));
-    box.appendChild(notes);
+    bar.appendChild(notes);
     const act = el('div', 'rv-actions');
     const next = el('button', 'primary', '下一局'); next.type = 'button'; next.addEventListener('click', nextRound);
     act.appendChild(next);
     act.appendChild(el('span', 'rv-notes', '分數為累計；所有人總分相加永遠是 0。'));
-    box.appendChild(act);
-    next.focus();
+    bar.appendChild(act);
+    next.focus({ preventScroll: true });
   }
 
   // ---------- 提示 / 整理 ----------
