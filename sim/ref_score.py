@@ -19,8 +19,24 @@ def lane_values(arr):
     return [brute(arr['front']), brute(arr['mid']), brute(arr['back'])]
 
 
+FRONT_DIGITS = {0: 3, 1: 2, 3: 1}  # 頭墩牌型實際比較的位數：烏龍 3、一對 2（對子+踢腳）、三條 1
+
+
+def digits(v):
+    out = []
+    for _ in range(5):
+        out.append(v % 15)
+        v //= 15
+    return v, out[::-1]  # (牌型階級, [t0..t4])
+
+
 def is_foul(v):
-    return not (v[0] <= v[1] <= v[2])
+    # 依 docs/RULES.md：頭 < 中 ≤ 尾；頭墩只比自己有的那幾位，3 張能比的部分相同算平手＝倒水
+    cf, tf = digits(v[0])
+    cm, tm = digits(v[1])
+    k = FRONT_DIGITS[cf]
+    front_below = cf < cm or (cf == cm and tf[:k] < tm[:k])
+    return (not front_below) or v[1] > v[2]
 
 
 def score_table(vals):

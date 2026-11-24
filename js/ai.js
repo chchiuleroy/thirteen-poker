@@ -42,13 +42,15 @@
       for (let i = 0; i < 13; i++) if ((m >> i) & 1) b3[k++] = hand[i];
       v3[m] = E.eval3(b3);
     }
-    return { hand, v5, v3 };
+    const fu = new Int32Array(8192); // 頭墩各子集的「與中墩比較的位數單位」，見 engine.frontFoul
+    for (let q = 0; q < MASK3.length; q++) { const m = MASK3[q]; fu[m] = E.FRONT_UNIT[E.catOf(v3[m])]; }
+    return { hand, v5, v3, fu };
   }
 
   /** 列舉所有合法（不倒水）擺法；cb(back, mid, front) */
   const idx8 = new Int32Array(8);
   function forEachLegal(p, cb) {
-    const v5 = p.v5, v3 = p.v3;
+    const v5 = p.v5, v3 = p.v3, fu = p.fu;
     for (let bi = 0; bi < MASK5.length; bi++) {
       const back = MASK5[bi], vb = v5[back];
       const rem = FULL ^ back;
@@ -60,7 +62,8 @@
         const vm = v5[mid];
         if (vm > vb) continue;
         const front = rem ^ mid;
-        if (v3[front] > vm) continue;
+        const u = fu[front];
+        if (!(v3[front] < Math.floor(vm / u) * u)) continue; // 頭墩必須嚴格小於中墩（同 engine.frontFoul）
         cb(back, mid, front);
       }
     }

@@ -65,13 +65,16 @@ test('頭墩 3 張：只有烏龍／一對／三條，3 張同花連號也不算
   assert.equal(cat([J, C(14, 0), C(3, 0)]), E.CAT.PAIR);
 });
 
-test('倒水判定：尾 ≥ 中 ≥ 頭 才合法；頭墩三條壓過中墩一對即倒水', () => {
+test('倒水判定：頭 < 中 ≤ 尾 才合法；頭墩三條壓過中墩一對即倒水', () => {
   const front = E.evalLane([C(9, 0), C(9, 1), C(9, 2)]);
   const mid = E.evalLane([C(14, 0), C(14, 1), C(2, 2), C(3, 3), C(4, 0)]);
   const back = E.evalLane([C(10, 0), C(10, 1), C(10, 2), C(3, 1), C(3, 2)]);
   assert.equal(E.isFoul(front, mid, back), true);
   assert.equal(E.isFoul(mid, front, back), false);
-  assert.equal(E.isFoul(mid, mid, mid), false); // 相等允許
+  assert.equal(E.isFoul(mid, mid, mid), true);  // 頭墩要嚴格小於中墩
+  assert.equal(E.isFoul(front, mid, mid), true); // 頭墩三條 > 中墩一對（用同一個 mid 當尾墩不影響）
+  const m = E.evalLane([C(2, 0), C(2, 1), C(5, 2), C(7, 3), C(9, 0)]);
+  assert.equal(E.isFoul(front, mid, mid) && !E.isFoul(E.evalLane([C(2, 2), C(2, 3), C(4, 0)]), m, m), true);
 });
 
 function sc(arrs) { return E.scoreRound(arrs); }
@@ -208,4 +211,24 @@ test('hard 與 greedy 在已知牌上的選擇：能湊五條就把五條放尾�
     const a = AI.choose(level, hand, { n: 2, rng, tables, models: [AI.makeModel()] });
     assert.equal(E.catOf(a.vals[2]), E.CAT.FIVE, level);
   }
+});
+
+test('頭墩嚴格小於中墩：3 張能比的部分相同就算平手 → 倒水（含多副牌的相同牌）', () => {
+  const back = E.evalLane([C(14, 0), C(14, 1), C(14, 2), C(3, 1), C(3, 2)]); // 尾墩葫蘆，夠大
+  const frontAAK = E.evalLane([C(14, 0), C(14, 1), C(13, 2)]);
+  // 頭 A-A-K 對中 A-A-K-Q-J：頭墩那 3 張的部分相同 → 平手 → 倒水
+  assert.equal(E.isFoul(frontAAK, E.evalLane([C(14, 2), C(14, 3), C(13, 0), C(12, 1), C(11, 2)]), back), true);
+  // 頭 A-A-K 對中 A-A-Q-J-9：頭墩較大 → 倒水
+  assert.equal(E.isFoul(frontAAK, E.evalLane([C(14, 2), C(14, 3), C(12, 0), C(11, 1), C(9, 2)]), back), true);
+  // 頭 A-A-3 對中 A-A-9-8-7：頭墩較小 → 合法
+  assert.equal(E.isFoul(E.evalLane([C(14, 0), C(14, 1), C(3, 2)]), E.evalLane([C(14, 2), C(14, 3), C(9, 0), C(8, 1), C(7, 2)]), back), false);
+  // 三條只比點數：頭 999 對中 999-x-y → 平手 → 倒水；頭 888 對中 999-x-y → 合法
+  assert.equal(E.isFoul(E.evalLane([C(9, 0), C(9, 1), C(9, 2)]), E.evalLane([C(9, 3), C(9, 0), C(9, 1), C(4, 2), C(2, 3)]), back), true);
+  assert.equal(E.isFoul(E.evalLane([C(8, 0), C(8, 1), C(8, 2)]), E.evalLane([C(9, 3), C(9, 0), C(9, 1), C(4, 2), C(2, 3)]), back), false);
+  // 烏龍：頭 A-K-9 對中 A-K-9-4-2 → 平手 → 倒水；頭 A-K-8 對中 A-K-9-4-2 → 合法
+  assert.equal(E.isFoul(E.evalLane([C(14, 0), C(13, 1), C(9, 2)]), E.evalLane([C(14, 1), C(13, 2), C(9, 3), C(4, 0), C(2, 1)]), back), true);
+  assert.equal(E.isFoul(E.evalLane([C(14, 0), C(13, 1), C(8, 2)]), E.evalLane([C(14, 1), C(13, 2), C(9, 3), C(4, 0), C(2, 1)]), back), false);
+  // 中墩可以等於尾墩
+  const mid = E.evalLane([C(6, 0), C(6, 1), C(2, 2), C(4, 3), C(9, 0)]);
+  assert.equal(E.isFoul(E.evalLane([C(3, 0), C(3, 1), C(2, 3)]), mid, mid), false);
 });

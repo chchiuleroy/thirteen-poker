@@ -195,7 +195,15 @@
   function laneBonus(lane, v) { return BONUS[LANE_KEYS[lane]][catOf(v)] || 0; }
 
   /** 由三墩牌力值判斷是否倒水（必須 front ≤ mid ≤ back） */
-  const isFoul = (vf, vm, vb) => !(vf <= vm && vm <= vb);
+  // 頭墩（3 張）與中墩（5 張）怎麼比：只看頭墩牌型「有的那幾位」——烏龍比前 3 張、一對比 (對子, 踢腳)、三條只比點數。
+  // 頭墩必須「嚴格小於」中墩：例如頭 A-A-K 對中 A-A-K-Q-J，3 張能比的部分相同 → 算平手 → 倒水。
+  const FRONT_UNIT = { 0: 225, 1: 3375, 3: 50625 }; // 頭墩牌型保留的位數對應的單位（15^2、15^3、15^4）
+  function frontFoul(vf, vm) {
+    const u = FRONT_UNIT[catOf(vf)];
+    return !(vf < Math.floor(vm / u) * u);
+  }
+  /** 倒水 = 頭墩沒有嚴格小於中墩，或中墩大於尾墩（尾墩可等於中墩） */
+  const isFoul = (vf, vm, vb) => frontFoul(vf, vm) || vm > vb;
 
   /**
    * 對 N 位玩家的三墩牌力值計分。vals[i] = [vf, vm, vb]（foul 玩家仍給值，由 isFoul 判定）。
@@ -285,7 +293,7 @@
 
   return {
     JOKER, CAT, CAT_NAME, RANK_NAME, SUIT_CHAR, BONUS, B5,
-    V, catOf, eval3, eval5, evalLane, laneName, laneBonus, isFoul,
+    V, catOf, eval3, eval5, evalLane, laneName, laneBonus, isFoul, frontFoul, FRONT_UNIT,
     scoreValues, scoreRound, valuesOf,
     mulberry32, makeShoe, shuffle, deal, cardLabel,
   };
