@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>十三支・鬼牌五條版</title>
+<meta name="description" content="十三支（Chinese Poker）網頁遊戲：2–4 人、人數＝牌副數、鬼牌百搭、五條，三級電腦對手。">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <h1>十三支 <small>鬼牌・五條版</small></h1>
+  <div class="top-actions">
+    <button id="btn-rules" class="ghost" type="button">規則</button>
+    <button id="btn-new" class="ghost" type="button" hidden>重新開局</button>
+  </div>
+</header>
+
+<main>
+  <!-- 設定畫面 -->
+  <section id="screen-setup" class="panel">
+    <h2>開新牌局</h2>
+    <div class="field">
+      <span class="label">人數</span>
+      <div class="seg" id="seg-players" role="radiogroup" aria-label="人數">
+        <button type="button" role="radio" data-v="2">2 人</button>
+        <button type="button" role="radio" data-v="3">3 人</button>
+        <button type="button" role="radio" data-v="4">4 人</button>
+      </div>
+      <p class="hint" id="deck-info"></p>
+    </div>
+    <div class="field">
+      <span class="label">電腦難度</span>
+      <div class="seg" id="seg-level" role="radiogroup" aria-label="難度">
+        <button type="button" role="radio" data-v="hard">困難</button>
+        <button type="button" role="radio" data-v="super">超困難</button>
+        <button type="button" role="radio" data-v="extreme">極限</button>
+      </div>
+      <p class="hint" id="level-info"></p>
+    </div>
+    <button id="btn-start" class="primary" type="button">開始</button>
+  </section>
+
+  <!-- 牌桌 -->
+  <section id="screen-table" hidden>
+    <div class="scoreboard" id="scoreboard" aria-live="polite"></div>
+
+    <div class="panel you" id="panel-you">
+      <div class="you-head">
+        <h2 id="round-title">第 1 局</h2>
+        <div class="you-tools">
+          <button id="btn-sort" class="ghost" type="button">整理手牌</button>
+          <button id="btn-clear" class="ghost" type="button">全部收回</button>
+          <button id="btn-hint" class="ghost" type="button" title="用極限 AI 幫你擺一組（仍可自己調整）">提示擺法</button>
+        </div>
+      </div>
+      <div id="lanes"></div>
+      <div class="tray-wrap">
+        <div class="tray-title">手牌（點一張牌，再點要放的墩；點已放的牌可收回）</div>
+        <div id="tray" class="cards tray"></div>
+      </div>
+      <div class="confirm-row">
+        <p id="status" class="status" aria-live="polite"></p>
+        <button id="btn-confirm" class="primary" type="button" disabled>攤牌</button>
+      </div>
+    </div>
+
+    <div id="reveal" class="panel" hidden></div>
+  </section>
+</main>
+
+<dialog id="dlg-rules">
+  <form method="dialog">
+    <h2>規則摘要</h2>
+    <div id="rules-body"></div>
+    <template id="tpl-rules">
+      <p>每人 13 張牌，排成 <b>頭墩 3 張、中墩 5 張、尾墩 5 張</b>，必須「尾墩 ≥ 中墩 ≥ 頭墩」，否則<b>倒水</b>。人數 = 牌副數，每副含 2 張鬼牌，<b>鬼牌可當任何牌</b>。</p>
+      <h3>牌型（大→小）</h3>
+      <p>五條（5 張同點數，多副牌或鬼牌才有）＞ 同花順 ＞ 鐵支 ＞ 葫蘆 ＞ 同花 ＞ 順子 ＞ 三條 ＞ 兩對 ＞ 一對 ＞ 烏龍。頭墩只有烏龍／一對／三條。A 可當最大或最小的順子（A-2-3-4-5），不能繞圈。不比花色。</p>
+      <h3>計分（兩兩比、各墩分開）</h3>
+      <ul>
+        <li>贏一墩 +1、輸 −1；對同一人三墩全勝＝<b>打槍</b>，基本分 3 變 6。</li>
+        <li><b>全壘打</b>（3 人以上、打槍所有其他人）：每位的 6 再 ×2 = 12。</li>
+        <li>倒水＝被所有人打槍；兩人都倒水互不計分。</li>
+      </ul>
+      <table>
+        <tr><th>墩</th><th>牌型</th><th>贏墩額外加分</th></tr>
+        <tr><td>頭</td><td>三條</td><td>+1</td></tr>
+        <tr><td>中</td><td>葫蘆／鐵支／同花順／五條</td><td>+1／+3／+4／+5</td></tr>
+        <tr><td>尾</td><td>鐵支／同花順／五條</td><td>+2／+3／+4</td></tr>
+      </table>
+      <p>額外加分不受打槍、全壘打加倍。完整規則與來源見專案 docs/RULES.md。</p></template>
+    <button class="primary">關閉</button>
+  </form>
+</dialog>
+
+<footer>
+  <span id="seed-info"></span>
+  <a href="https://github.com/chchiuleroy/thirteen-poker" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<script src="js/engine.js"></script>
+<script src="js/tables.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

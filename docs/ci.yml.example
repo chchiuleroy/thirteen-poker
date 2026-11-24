@@ -1,0 +1,17 @@
+name: test
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: 單元測試
+        run: npm test
+      - name: 牌墩評價 × Python 暴力列舉交叉驗證
+        run: mkdir -p .cache && node sim/gen_eval_cases.js .cache/eval_cases.json && python sim/ref_eval.py .cache/eval_cases.json
+      - name: 整桌計分 × Python 獨立實作交叉驗證
+        run: node sim/gen_score_cases.js .cache/score_cases.json 3000 && cd sim && python ref_score.py ../.cache/score_cases.json

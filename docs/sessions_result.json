@@ -1,0 +1,322 @@
+[
+ {
+  "n": 2,
+  "opp": [
+   "hard"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": 0,
+    "ci95": 0,
+    "superVsOpp": 0.395
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": -0.028,
+    "ci95": 0.026,
+    "superVsOpp": 0.411
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": 0.004,
+    "ci95": 0.024,
+    "superVsOpp": 0.265
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": 0.037,
+    "ci95": 0.024,
+    "superVsOpp": 0.275
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": 0.03,
+    "ci95": 0.019,
+    "superVsOpp": 0.279
+   }
+  ]
+ },
+ {
+  "n": 2,
+  "opp": [
+   "super"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": 0,
+    "ci95": 0,
+    "superVsOpp": 0.068
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": -0.043,
+    "ci95": 0.027,
+    "superVsOpp": 0.11
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": -0.021,
+    "ci95": 0.023,
+    "superVsOpp": -0.027
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": -0.018,
+    "ci95": 0.021,
+    "superVsOpp": 0.005
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": -0.011,
+    "ci95": 0.015,
+    "superVsOpp": -0.033
+   }
+  ]
+ },
+ {
+  "n": 2,
+  "opp": [
+   "greedy"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": 0,
+    "ci95": 0,
+    "superVsOpp": 1.58
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": 0.01,
+    "ci95": 0.026,
+    "superVsOpp": 1.506
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": 0.114,
+    "ci95": 0.028,
+    "superVsOpp": 1.427
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": 0.159,
+    "ci95": 0.028,
+    "superVsOpp": 1.401
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": 0.25,
+    "ci95": 0.025,
+    "superVsOpp": 1.361
+   }
+  ]
+ },
+ {
+  "n": 3,
+  "opp": [
+   "hard",
+   "hard"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": 0.048,
+    "ci95": 0.162,
+    "superVsOpp": 0.307
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": -0.042,
+    "ci95": 0.104,
+    "superVsOpp": 0.541
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": -0.006,
+    "ci95": 0.061,
+    "superVsOpp": 0.915
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": 0.095,
+    "ci95": 0.057,
+    "superVsOpp": 0.498
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": 0.161,
+    "ci95": 0.043,
+    "superVsOpp": 0.793
+   }
+  ]
+ },
+ {
+  "n": 3,
+  "opp": [
+   "super",
+   "super"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": 0.003,
+    "ci95": 0.147,
+    "superVsOpp": -0.105
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": -0.029,
+    "ci95": 0.094,
+    "superVsOpp": -0.094
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": -0.019,
+    "ci95": 0.059,
+    "superVsOpp": 0.073
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": 0.002,
+    "ci95": 0.049,
+    "superVsOpp": -0.181
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": 0.033,
+    "ci95": 0.037,
+    "superVsOpp": 0.134
+   }
+  ]
+ },
+ {
+  "n": 4,
+  "opp": [
+   "hard",
+   "hard",
+   "hard"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": -0.013,
+    "ci95": 0.146,
+    "superVsOpp": 0.657
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": 0.066,
+    "ci95": 0.083,
+    "superVsOpp": 1.212
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": 0.043,
+    "ci95": 0.065,
+    "superVsOpp": 0.902
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": 0.159,
+    "ci95": 0.055,
+    "superVsOpp": 0.994
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": 0.188,
+    "ci95": 0.046,
+    "superVsOpp": 0.918
+   }
+  ]
+ },
+ {
+  "n": 4,
+  "opp": [
+   "super",
+   "super",
+   "super"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": -0.022,
+    "ci95": 0.14,
+    "superVsOpp": -0.065
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": 0.019,
+    "ci95": 0.079,
+    "superVsOpp": 0.267
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": -0.004,
+    "ci95": 0.066,
+    "superVsOpp": -0.14
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": -0.011,
+    "ci95": 0.047,
+    "superVsOpp": 0.09
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": 0.014,
+    "ci95": 0.035,
+    "superVsOpp": -0.008
+   }
+  ]
+ },
+ {
+  "n": 4,
+  "opp": [
+   "hard",
+   "super",
+   "greedy"
+  ],
+  "sessions": 400,
+  "rows": [
+   {
+    "rounds": "1-1",
+    "extMinusSuper": 0.013,
+    "ci95": 0.205,
+    "superVsOpp": 1.673
+   },
+   {
+    "rounds": "2-5",
+    "extMinusSuper": 0.052,
+    "ci95": 0.09,
+    "superVsOpp": 2.07
+   },
+   {
+    "rounds": "6-15",
+    "extMinusSuper": 0.033,
+    "ci95": 0.058,
+    "superVsOpp": 1.589
+   },
+   {
+    "rounds": "16-30",
+    "extMinusSuper": 0.048,
+    "ci95": 0.049,
+    "superVsOpp": 1.791
+   },
+   {
+    "rounds": "31-60",
+    "extMinusSuper": 0.06,
+    "ci95": 0.039,
+    "superVsOpp": 1.804
+   }
+  ]
+ }
+]

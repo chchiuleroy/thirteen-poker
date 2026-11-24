@@ -1,0 +1,510 @@
+[
+ {
+  "n": 2,
+  "levels": [
+   "greedy",
+   "random"
+  ],
+  "deals": 6000,
+  "seats": [
+   {
+    "level": "greedy",
+    "mean": 3.0003333333333333,
+    "se": 0.0257093796833705
+   },
+   {
+    "level": "random",
+    "mean": -3.0003333333333333,
+    "se": 0.0257093796833705
+   }
+  ],
+  "stats": {
+   "deals": 6000,
+   "foul": 0,
+   "five": 742,
+   "sweeps": 3478,
+   "homeruns": 0
+  },
+  "seconds": 8
+ },
+ {
+  "n": 2,
+  "levels": [
+   "hard",
+   "random"
+  ],
+  "deals": 6000,
+  "seats": [
+   {
+    "level": "hard",
+    "mean": 5.367,
+    "se": 0.022688326660788946
+   },
+   {
+    "level": "random",
+    "mean": -5.367,
+    "se": 0.022688326660788946
+   }
+  ],
+  "stats": {
+   "deals": 6000,
+   "foul": 0,
+   "five": 572,
+   "sweeps": 8663,
+   "homeruns": 0
+  },
+  "seconds": 7
+ },
+ {
+  "n": 2,
+  "levels": [
+   "super",
+   "random"
+  ],
+  "deals": 6000,
+  "seats": [
+   {
+    "level": "super",
+    "mean": 5.797166666666667,
+    "se": 0.02014092836416361
+   },
+   {
+    "level": "random",
+    "mean": -5.797166666666667,
+    "se": 0.02014092836416361
+   }
+  ],
+  "stats": {
+   "deals": 6000,
+   "foul": 0,
+   "five": 482,
+   "sweeps": 9573,
+   "homeruns": 0
+  },
+  "seconds": 8
+ },
+ {
+  "n": 2,
+  "levels": [
+   "extreme",
+   "random"
+  ],
+  "deals": 3000,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 5.813166666666667,
+    "se": 0.027994106357244967
+   },
+   {
+    "level": "random",
+    "mean": -5.813166666666667,
+    "se": 0.027994106357244967
+   }
+  ],
+  "stats": {
+   "deals": 3000,
+   "foul": 0,
+   "five": 239,
+   "sweeps": 4822,
+   "homeruns": 0
+  },
+  "seconds": 4
+ },
+ {
+  "n": 2,
+  "levels": [
+   "hard",
+   "greedy"
+  ],
+  "deals": 6000,
+  "seats": [
+   {
+    "level": "hard",
+    "mean": 1.3791666666666667,
+    "se": 0.017382059583673348
+   },
+   {
+    "level": "greedy",
+    "mean": -1.3791666666666667,
+    "se": 0.017382059583673348
+   }
+  ],
+  "stats": {
+   "deals": 6000,
+   "foul": 0,
+   "five": 1306,
+   "sweeps": 3403,
+   "homeruns": 0
+  },
+  "seconds": 6
+ },
+ {
+  "n": 2,
+  "levels": [
+   "super",
+   "greedy"
+  ],
+  "deals": 6000,
+  "seats": [
+   {
+    "level": "super",
+    "mean": 1.3651666666666666,
+    "se": 0.017612274628581982
+   },
+   {
+    "level": "greedy",
+    "mean": -1.3651666666666666,
+    "se": 0.017612274628581982
+   }
+  ],
+  "stats": {
+   "deals": 6000,
+   "foul": 0,
+   "five": 1216,
+   "sweeps": 2985,
+   "homeruns": 0
+  },
+  "seconds": 7
+ },
+ {
+  "n": 2,
+  "levels": [
+   "extreme",
+   "greedy"
+  ],
+  "deals": 3000,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 1.375,
+    "se": 0.024972484858339587
+   },
+   {
+    "level": "greedy",
+    "mean": -1.375,
+    "se": 0.024972484858339587
+   }
+  ],
+  "stats": {
+   "deals": 3000,
+   "foul": 0,
+   "five": 608,
+   "sweeps": 1477,
+   "homeruns": 0
+  },
+  "seconds": 4
+ },
+ {
+  "n": 2,
+  "levels": [
+   "super",
+   "hard"
+  ],
+  "deals": 6000,
+  "seats": [
+   {
+    "level": "super",
+    "mean": 0.2614166666666667,
+    "se": 0.01528181377245273
+   },
+   {
+    "level": "hard",
+    "mean": -0.2614166666666667,
+    "se": 0.01528181377245273
+   }
+  ],
+  "stats": {
+   "deals": 6000,
+   "foul": 0,
+   "five": 1046,
+   "sweeps": 2777,
+   "homeruns": 0
+  },
+  "seconds": 7
+ },
+ {
+  "n": 2,
+  "levels": [
+   "extreme",
+   "hard"
+  ],
+  "deals": 3000,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 0.23933333333333334,
+    "se": 0.021425993213505537
+   },
+   {
+    "level": "hard",
+    "mean": -0.23933333333333334,
+    "se": 0.021425993213505537
+   }
+  ],
+  "stats": {
+   "deals": 3000,
+   "foul": 0,
+   "five": 521,
+   "sweeps": 1357,
+   "homeruns": 0
+  },
+  "seconds": 3
+ },
+ {
+  "n": 2,
+  "levels": [
+   "extreme",
+   "super"
+  ],
+  "deals": 3000,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 0,
+    "se": 0
+   },
+   {
+    "level": "super",
+    "mean": 0,
+    "se": 0
+   }
+  ],
+  "stats": {
+   "deals": 3000,
+   "foul": 0,
+   "five": 474,
+   "sweeps": 1350,
+   "homeruns": 0
+  },
+  "seconds": 4
+ },
+ {
+  "n": 3,
+  "levels": [
+   "extreme",
+   "super",
+   "hard"
+  ],
+  "deals": 2000,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 0.30733333333333335,
+    "se": 0.04020428114296066
+   },
+   {
+    "level": "super",
+    "mean": 0.373,
+    "se": 0.03968195713699391
+   },
+   {
+    "level": "hard",
+    "mean": -0.6803333333333333,
+    "se": 0.043094417658593946
+   }
+  ],
+  "stats": {
+   "deals": 2000,
+   "foul": 0,
+   "five": 972,
+   "sweeps": 4205,
+   "homeruns": 596
+  },
+  "seconds": 5
+ },
+ {
+  "n": 3,
+  "levels": [
+   "hard",
+   "greedy",
+   "random"
+  ],
+  "deals": 4000,
+  "seats": [
+   {
+    "level": "hard",
+    "mean": 8.906666666666666,
+    "se": 0.06009693558465911
+   },
+   {
+    "level": "greedy",
+    "mean": 0.9812500000000001,
+    "se": 0.053241740605546824
+   },
+   {
+    "level": "random",
+    "mean": -9.887916666666667,
+    "se": 0.04932268633349951
+   }
+  ],
+  "stats": {
+   "deals": 4000,
+   "foul": 0,
+   "five": 1638,
+   "sweeps": 15592,
+   "homeruns": 2664
+  },
+  "seconds": 9
+ },
+ {
+  "n": 4,
+  "levels": [
+   "extreme",
+   "super",
+   "hard",
+   "greedy"
+  ],
+  "deals": 1500,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 1.7001666666666666,
+    "se": 0.053361815137931874
+   },
+   {
+    "level": "super",
+    "mean": 1.6885,
+    "se": 0.04588942809745085
+   },
+   {
+    "level": "hard",
+    "mean": 0.8478333333333333,
+    "se": 0.04981055425123088
+   },
+   {
+    "level": "greedy",
+    "mean": -4.2365,
+    "se": 0.06306007409165043
+   }
+  ],
+  "stats": {
+   "deals": 1500,
+   "foul": 0,
+   "five": 1567,
+   "sweeps": 8731,
+   "homeruns": 338
+  },
+  "seconds": 8
+ },
+ {
+  "n": 4,
+  "levels": [
+   "extreme",
+   "hard",
+   "hard",
+   "hard"
+  ],
+  "deals": 1500,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 0.939,
+    "se": 0.05533953178133854
+   },
+   {
+    "level": "hard",
+    "mean": -0.2925,
+    "se": 0.03486786565816089
+   },
+   {
+    "level": "hard",
+    "mean": -0.31066666666666665,
+    "se": 0.02984946925516122
+   },
+   {
+    "level": "hard",
+    "mean": -0.3358333333333333,
+    "se": 0.03362959317382589
+   }
+  ],
+  "stats": {
+   "deals": 1500,
+   "foul": 0,
+   "five": 1533,
+   "sweeps": 8952,
+   "homeruns": 377
+  },
+  "seconds": 5
+ },
+ {
+  "n": 4,
+  "levels": [
+   "super",
+   "hard",
+   "hard",
+   "hard"
+  ],
+  "deals": 3000,
+  "seats": [
+   {
+    "level": "super",
+    "mean": 0.9124166666666667,
+    "se": 0.03695312342710043
+   },
+   {
+    "level": "hard",
+    "mean": -0.29825,
+    "se": 0.02203394682075819
+   },
+   {
+    "level": "hard",
+    "mean": -0.2945833333333333,
+    "se": 0.021254344599442532
+   },
+   {
+    "level": "hard",
+    "mean": -0.31958333333333333,
+    "se": 0.02183787988072984
+   }
+  ],
+  "stats": {
+   "deals": 3000,
+   "foul": 0,
+   "five": 3339,
+   "sweeps": 16683,
+   "homeruns": 632
+  },
+  "seconds": 6
+ },
+ {
+  "n": 4,
+  "levels": [
+   "extreme",
+   "super",
+   "super",
+   "super"
+  ],
+  "deals": 1500,
+  "seats": [
+   {
+    "level": "extreme",
+    "mean": 0.0575,
+    "se": 0.021757278475642735
+   },
+   {
+    "level": "super",
+    "mean": -0.013166666666666667,
+    "se": 0.011069025016450854
+   },
+   {
+    "level": "super",
+    "mean": -0.023666666666666666,
+    "se": 0.009736182992284976
+   },
+   {
+    "level": "super",
+    "mean": -0.020666666666666667,
+    "se": 0.008530581153404193
+   }
+  ],
+  "stats": {
+   "deals": 1500,
+   "foul": 0,
+   "five": 1405,
+   "sweeps": 8075,
+   "homeruns": 255
+  },
+  "seconds": 6
+ }
+]

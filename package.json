@@ -1,0 +1,15 @@
+{
+  "name": "thirteen-poker",
+  "version": "1.0.0",
+  "description": "十三支（Chinese Poker）網頁遊戲：2–4 人、N 副牌、鬼牌百搭、五條；含三級 AI（困難／超困難／極限）與完整驗證模擬",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "verify:eval": "node -e \"require('fs').mkdirSync('.cache',{recursive:true})\" && node sim/gen_eval_cases.js .cache/eval_cases.json && python sim/ref_eval.py .cache/eval_cases.json",
+    "verify:score": "node -e \"require('fs').mkdirSync('.cache',{recursive:true})\" && node sim/gen_score_cases.js .cache/score_cases.json && python sim/ref_score.py .cache/score_cases.json",
+    "calibrate": "node sim/calibrate.js --hands 30000 --iters 12 --duels 1500",
+    "tournament": "node sim/tournament.js --suite full --scale 1 --out docs/tournament_result.json",
+    "sessions": "node sim/sessions.js --sessions 400 --rounds 60 --out docs/sessions_result.json"
+  }
+}
