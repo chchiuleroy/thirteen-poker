@@ -19,7 +19,7 @@
   const S = {
     n: 2, level: 'hard',
     round: 0, totals: [], names: [],
-    hands: [], loc: [], selected: null, sortMode: 'rank',
+    hands: [], loc: [], sel: new Set(), sortMode: 'rank',
     aiArr: [], aiReady: false, models: [], phase: 'setup', seed: 0,
   };
 
@@ -71,7 +71,7 @@
     const rng = E.mulberry32(S.seed);
     S.hands = E.deal(S.n, rng);
     S.loc = new Array(13).fill('tray');
-    S.selected = null; S.phase = 'arrange'; S.aiReady = false; S.aiArr = [];
+    S.sel.clear(); S.phase = 'arrange'; S.aiReady = false; S.aiArr = [];
     $('reveal').hidden = true; $('panel-you').hidden = false;
     $('seed-info').textContent = `第 ${S.round} 局牌局種子 #${S.seed}（相同種子會發出相同的牌）`;
     $('round-title').textContent = `第 ${S.round} 局`;
@@ -99,11 +99,22 @@
   }
   function sortTray() { /* 顯示時才排序；保持 loc 不變 */ }
 
+  /** 把選取的牌（可來自手牌或其他墩）放進指定墩；放不下的留在選取狀態 */
   function placeSelected(key) {
-    if (S.selected === null) return;
+    if (!S.sel.size) { flash('先選牌：點牌可多選，也可以在牌上拖曳劃選。'); return; }
     const lane = LANES.find((l) => l.key === key);
-    if (laneCards(key).length >= lane.size) { flash(`${lane.label}已滿，先點一張牌收回`); return; }
-    S.loc[S.selected] = key; S.selected = null; render();
+    const inLane = new Set(laneCards(key));
+    const free = lane.size - inLane.size;
+    const cand = sortIdx([...S.sel].filter((i) => !inLane.has(i)));
+    if (!cand.length) { S.sel.clear(); render(); return; }
+    const take = cand.slice(0, Math.max(0, free));
+    for (const i of take) { S.loc[i] = key; S.sel.delete(i); }
+    render();
+    if (take.length < cand.length) flash(`${lane.label}只剩 ${free} 個位置，其餘 ${cand.length - take.length} 張仍在選取中。`);
+  }
+  function returnSelected() {
+    for (const i of S.sel) S.loc[i] = 'tray';
+    S.sel.clear(); render();
   }
   function flash(msg) { const s = $('status'); s.className = 'status warn'; s.textContent = msg; }
 
@@ -138,7 +149,7 @@
     const wrap = $('lanes'); wrap.textContent = '';
     for (const lane of LANES) {
       const idxs = sortIdx(laneCards(lane.key));
-      const d = el('div', 'lane' + (S.selected !== null ? ' target' : ''));
+      const d = el('div', 'lane' + (S.sel.size ? ' target' : ''));
       d.tabIndex = 0; d.setAttribute('role', 'button'); d.setAttribute('aria-label', `${lane.label}，放入選取的牌`);
       d.dataset.lane = lane.key;
       const head = el('div', 'lane-head');
@@ -149,24 +160,76 @@
       const row = el('div', 'cards');
       for (const i of idxs) {
         const c = cardEl(S.hands[0][i]); c.dataset.i = i;
-        c.addEventListener('click', (ev) => { ev.stopPropagation(); S.loc[i] = 'tray'; S.selected = null; render(); });
+        if (S.sel.has(i)) c.classList.add('sel');
         row.appendChild(c);
       }
       for (let k = idxs.length; k < lane.size; k++) row.appendChild(el('span', 'slot'));
       d.appendChild(row);
       const go = () => placeSelected(lane.key);
-      d.addEventListener('click', go);
+      d.addEventListener('click', (ev) => { if (!ev.target.closest('.card')) go(); });
       d.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } });
       wrap.appendChild(d);
     }
     const tray = $('tray'); tray.textContent = '';
     for (const i of sortIdx(trayCards())) {
       const c = cardEl(S.hands[0][i]); c.dataset.i = i;
-      if (S.selected === i) c.classList.add('sel');
-      c.addEventListener('click', () => { S.selected = S.selected === i ? null : i; render(); });
+      if (S.sel.has(i)) c.classList.add('sel');
       tray.appendChild(c);
     }
+    renderSelBar();
     $('btn-confirm').disabled = !canConfirm();
+  }
+
+  // ---------- 選取列與劃選 ----------
+  function renderSelBar() {
+    const bar = $('selbar'); bar.textContent = '';
+    const n = S.sel.size;
+    bar.appendChild(el('span', 'selcount', n ? `已選 ${n} 張` : '先選牌'));
+    for (const lane of LANES) {
+      const inLane = new Set(laneCards(lane.key));
+      const free = lane.size - inLane.size;
+      const b = el('button', 'ghost', `放入${lane.label}`);
+      b.type = 'button'; b.disabled = !n;
+      b.title = `${lane.label}還有 ${free} 個位置`;
+      b.addEventListener('click', () => placeSelected(lane.key));
+      bar.appendChild(b);
+    }
+    const back = el('button', 'ghost', '收回手牌'); back.type = 'button';
+    back.disabled = ![...S.sel].some((i) => S.loc[i] !== 'tray');
+    back.addEventListener('click', returnSelected); bar.appendChild(back);
+    const clr = el('button', 'ghost', '取消選取'); clr.type = 'button'; clr.disabled = !n;
+    clr.addEventListener('click', () => { S.sel.clear(); render(); }); bar.appendChild(clr);
+  }
+
+  // 點一下切換選取；在牌上按住拖過去可一次劃選（或劃掉）多張。起點牌決定本次是「加選」還是「取消」。
+  let drag = null;
+  function setCardSel(i, on) {
+    if (on) S.sel.add(i); else S.sel.delete(i);
+    for (const c of document.querySelectorAll(`#panel-you .card[data-i="${i}"]`)) c.classList.toggle('sel', on);
+  }
+  function cardAt(x, y) { const e = document.elementFromPoint(x, y); return e && e.closest ? e.closest('#panel-you .card[data-i]') : null; }
+  function initSelection() {
+    const panel = $('panel-you');
+    panel.addEventListener('pointerdown', (ev) => {
+      if (S.phase !== 'arrange' || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+      const c = ev.target.closest('.card[data-i]'); if (!c) return;
+      const i = +c.dataset.i, on = !S.sel.has(i);
+      drag = { on, visited: new Set([i]) };
+      setCardSel(i, on);
+    });
+    panel.addEventListener('pointermove', (ev) => {
+      if (!drag) return;
+      const c = cardAt(ev.clientX, ev.clientY); if (!c) return;
+      const i = +c.dataset.i;
+      if (!drag.visited.has(i)) { drag.visited.add(i); setCardSel(i, drag.on); }
+    });
+    const end = () => { if (drag) { drag = null; render(); } };
+    window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);
+    // 鍵盤（Enter／空白鍵）：click 事件 detail === 0
+    panel.addEventListener('click', (ev) => {
+      const c = ev.target.closest('.card[data-i]');
+      if (c && ev.detail === 0) { const i = +c.dataset.i; setCardSel(i, !S.sel.has(i)); render(); }
+    });
   }
 
   function canConfirm() {
@@ -181,7 +244,7 @@
     const s = $('status');
     if (S.phase !== 'arrange') { s.className = 'status'; s.textContent = ''; return; }
     const left = trayCards().length;
-    if (left) { s.className = 'status'; s.textContent = S.selected === null ? `還有 ${left} 張牌沒放：先點一張牌，再點要放的墩。` : '再點一個墩，把選取的牌放進去。'; return; }
+    if (left) { s.className = 'status'; s.textContent = S.sel.size ? `已選 ${S.sel.size} 張：按上面的「放入○墩」，或直接點要放的墩。` : `還有 ${left} 張牌沒放：點牌可多選（也可拖曳劃選），再選要放的墩。`; return; }
     const v = E.valuesOf(currentArrangement());
     if (v[0] > v[1]) { s.className = 'status warn'; s.textContent = '倒水：頭墩比中墩大了，請調整（尾墩 ≥ 中墩 ≥ 頭墩）。'; }
     else if (v[1] > v[2]) { s.className = 'status warn'; s.textContent = '倒水：中墩比尾墩大了，請調整（尾墩 ≥ 中墩 ≥ 頭墩）。'; }
@@ -276,7 +339,7 @@
         const k = pool.findIndex((x) => x.c === c); S.loc[pool[k].i] = lane.key; pool.splice(k, 1);
       }
     }
-    S.selected = null; render();
+    S.sel.clear(); render();
   }
 
   // ---------- 規則 ----------
@@ -294,7 +357,7 @@
     $('seg-level').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.level = b.dataset.v; store('tp.level', S.level); refreshSetup(); });
     $('btn-start').addEventListener('click', newGame);
     $('btn-confirm').addEventListener('click', reveal);
-    $('btn-clear').addEventListener('click', () => { if (S.phase !== 'arrange') return; S.loc = new Array(13).fill('tray'); S.selected = null; render(); });
+    $('btn-clear').addEventListener('click', () => { if (S.phase !== 'arrange') return; S.loc = new Array(13).fill('tray'); S.sel.clear(); render(); });
     $('btn-sort').addEventListener('click', () => { S.sortMode = S.sortMode === 'rank' ? 'suit' : 'rank'; $('btn-sort').textContent = S.sortMode === 'rank' ? '依花色整理' : '依點數整理'; render(); });
     $('btn-hint').addEventListener('click', hint);
     $('btn-rules').addEventListener('click', () => $('dlg-rules').showModal());
@@ -303,6 +366,7 @@
       S.phase = 'setup'; $('screen-table').hidden = true; $('screen-setup').hidden = false; $('btn-new').hidden = true; $('seed-info').textContent = '';
     });
     $('btn-sort').textContent = '依花色整理';
+    initSelection();
   }
   document.addEventListener('DOMContentLoaded', init);
 

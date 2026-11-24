@@ -54,11 +54,12 @@
           <button id="btn-hint" class="ghost" type="button" title="用極限 AI 幫你擺一組（仍可自己調整）">提示擺法</button>
         </div>
       </div>
-      <div id="lanes"></div>
+      <div id="selbar" class="selbar" role="toolbar" aria-label="選取的牌"></div>
       <div class="tray-wrap">
-        <div class="tray-title">手牌（點一張牌，再點要放的墩；點已放的牌可收回）</div>
+        <div class="tray-title">手牌：點牌可多選，也可拖曳劃選，再按「放入○墩」</div>
         <div id="tray" class="cards tray"></div>
       </div>
+      <div id="lanes"></div>
       <div class="confirm-row">
         <p id="status" class="status" aria-live="polite"></p>
         <button id="btn-confirm" class="primary" type="button" disabled>攤牌</button>

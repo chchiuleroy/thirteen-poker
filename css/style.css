@@ -139,3 +139,9 @@ dialog p, dialog li { font-size: .88rem; }
   .rv-lane .hn { min-width: 0; }
   .you-head h2 { width: 100%; }
 }
+
+/* 選取列 */
+.selbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 4px; padding: 8px; border: 1px solid var(--panel-edge); border-radius: var(--radius); background: var(--slot); position: sticky; top: 0; z-index: 5; backdrop-filter: blur(6px); }
+.selcount { font-weight: 700; min-width: 4.8em; color: var(--accent); }
+.selbar button:disabled { opacity: .4; cursor: not-allowed; }
+.card { touch-action: pan-y; -webkit-user-select: none; user-select: none; }
