@@ -9,6 +9,10 @@
 
 ## 玩
 
+**線上直接玩：<https://chchiuleroy.github.io/thirteen-poker/>**
+
+本機：
+
 ```bash
 # 直接用瀏覽器開 index.html 即可，或：
 python -m http.server 8000     # 然後開 http://localhost:8000
