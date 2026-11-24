@@ -176,6 +176,7 @@
       if (S.sel.has(i)) c.classList.add('sel');
       tray.appendChild(c);
     }
+    $('tray').parentElement.hidden = trayCards().length === 0; // 手牌放完就把整塊（含說明）收起來
     renderSelBar();
     $('btn-confirm').disabled = !canConfirm();
   }

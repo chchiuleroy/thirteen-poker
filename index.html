@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>十三支・鬼牌五條版</title>
 <meta name="description" content="十三支（Chinese Poker）網頁遊戲：2–4 人、人數＝牌副數、鬼牌百搭、五條，三級電腦對手。">
-<link rel="stylesheet" href="css/style.css?v=20261124c">
+<link rel="stylesheet" href="css/style.css?v=20261124d">
 </head>
 <body>
 <header class="top">
@@ -55,16 +55,16 @@
           <button id="btn-hint" class="ghost" type="button" title="用極限 AI 幫你擺一組（仍可自己調整）">提示擺法</button>
         </div>
       </div>
-      <div id="selbar" class="selbar" role="toolbar" aria-label="選取的牌"></div>
+      <div id="selwrap" class="selbar">
+        <div id="selbar" role="toolbar" aria-label="選取的牌"></div>
+        <button id="btn-confirm" class="primary" type="button" disabled>攤牌</button>
+        <p id="status" class="status" aria-live="polite"></p>
+      </div>
       <div class="tray-wrap">
         <div class="tray-title">手牌：點牌可多選，也可拖曳劃選，再按「放入○墩」</div>
         <div id="tray" class="cards tray"></div>
       </div>
       <div id="lanes"></div>
-      <div class="confirm-row">
-        <p id="status" class="status" aria-live="polite"></p>
-        <button id="btn-confirm" class="primary" type="button" disabled>攤牌</button>
-      </div>
     </div>
 
     <div id="reveal" class="panel" hidden></div>
@@ -98,13 +98,13 @@
 
 <footer>
   <span id="seed-info"></span>
-  <span class="ver">版本 20261124c</span>
+  <span class="ver">版本 20261124d</span>
   <a href="https://github.com/chchiuleroy/thirteen-poker" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
-<script src="js/engine.js?v=20261124c"></script>
-<script src="js/tables.js?v=20261124c"></script>
-<script src="js/ai.js?v=20261124c"></script>
-<script src="js/app.js?v=20261124c"></script>
+<script src="js/engine.js?v=20261124d"></script>
+<script src="js/tables.js?v=20261124d"></script>
+<script src="js/ai.js?v=20261124d"></script>
+<script src="js/app.js?v=20261124d"></script>
 </body>
 </html>
