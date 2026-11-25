@@ -17,8 +17,8 @@
   const AI_NAMES = ['電腦 A', '電腦 B', '電腦 C'];
 
   const S = {
-    n: 2, level: 'hard',
-    round: 0, totals: [], names: [],
+    n: 2, level: 'hard', start: 300,
+    round: 0, chips: [], delta: [], match: null, names: [],
     hands: [], loc: [], sel: new Set(), sortMode: 'rank',
     aiArr: [], aiReady: false, models: [], phase: 'setup', seed: 0,
   };
@@ -51,11 +51,13 @@
     setSeg('seg-players', S.n); setSeg('seg-level', S.level);
     $('deck-info').textContent = `${S.n} 人 = ${S.n} 副牌 + ${2 * S.n} 張鬼牌，共 ${54 * S.n} 張，每人 13 張。`;
     $('level-info').textContent = LEVEL_INFO[S.level];
+    setSeg('seg-start', S.start);
+    $('chip-info').textContent = `每人 ${S.start} 籌碼；每 1 分＝${E.CHIP_MULT[S.n]} 籌碼（${S.n} 人桌）。任何人籌碼降到 0 或以下，比賽立刻結束並結算誰贏、誰破產。`;
   }
 
   // ---------- 開局 ----------
   function newGame() {
-    S.totals = new Array(S.n).fill(0);
+    S.chips = new Array(S.n).fill(S.start); S.delta = new Array(S.n).fill(0); S.match = null;
     S.names = ['你'].concat(AI_NAMES.slice(0, S.n - 1));
     S.round = 0;
     // models[s][k]：AI 座位 s 對「其他座位」的觀察（依座位順序、不含自己）
@@ -137,10 +139,13 @@
       const nm = el('div', 'nm'); nm.appendChild(el('span', '', S.names[s]));
       if (s > 0) nm.appendChild(el('span', '', LEVEL_NAME[S.level]));
       c.appendChild(nm);
-      c.appendChild(el('div', 'tot ' + (S.totals[s] > 0 ? 'pos' : S.totals[s] < 0 ? 'neg' : ''), (S.totals[s] > 0 ? '+' : '') + S.totals[s]));
+      const broke = S.chips[s] <= 0;
+      c.appendChild(el('div', 'tot ' + (broke ? 'neg' : ''), String(S.chips[s])));
       let st = '';
       if (s > 0 && S.phase === 'arrange') st = S.aiReady ? '已擺好' : '思考中…';
-      c.appendChild(el('div', 'st', st || '累計'));
+      else if (S.phase === 'reveal' || S.phase === 'over') st = `本局 ${fmt(S.delta[s])}`;
+      if (S.match && S.match.bankrupt.includes(s)) st = '破產';
+      c.appendChild(el('div', 'st' + (broke ? ' neg' : ''), st || '籌碼'));
       box.appendChild(c);
     }
   }
@@ -261,9 +266,12 @@
     const arrs = [mine].concat(S.aiArr.slice(1).map((a) => ({ front: a.front, mid: a.mid, back: a.back })));
     const vals = arrs.map(E.valuesOf);
     const sc = E.scoreValues(vals);
-    for (let s = 0; s < S.n; s++) S.totals[s] += sc.totals[s];
+    const mult = E.CHIP_MULT[S.n];
+    for (let s = 0; s < S.n; s++) { S.delta[s] = sc.totals[s] * mult; S.chips[s] += S.delta[s]; }
+    S.match = E.matchResult(S.chips);   // 任何人 <= 0 即整場結束；整場結束時不能再開下一局，只能回設定頁
     // 每位電腦都觀察到「其他座位」攤出的三墩（公開資訊）
     for (let s = 1; s < S.n; s++) { let k = 0; for (let o = 0; o < S.n; o++) if (o !== s) AI.observe(S.models[s][k++], vals[o]); }
+    if (S.match.over) S.phase = 'over';
     renderReveal(arrs, vals, sc);
     renderScoreboard();
     $('lanes').textContent = ''; $('tray').textContent = '';
@@ -290,7 +298,7 @@
       if (r[l] === 1 && !sc.foul[0]) { const b = E.laneBonus(l, vals[0][l]); if (b) notes.push(`${names[l]}墩${E.laneName(vals[0][l]).split(' ')[0]}+${b}`); }
       if (r[l] === -1 && !sc.foul[j]) { const b = E.laneBonus(l, vals[j][l]); if (b) notes.push(`對手${names[l]}墩${E.laneName(vals[j][l]).split(' ')[0]}−${b}`); }
     }
-    return `${S.names[0]} 對 ${S.names[j]}：頭中尾 ${sym}${notes.length ? '（' + notes.join('、') + '）' : ''} → ${fmt(sc.pair[0][j])}`;
+    return `${S.names[0]} 對 ${S.names[j]}：頭中尾 ${sym}${notes.length ? '（' + notes.join('、') + '）' : ''} → ${fmt(sc.pair[0][j])} 分＝${fmt(sc.pair[0][j] * E.CHIP_MULT[S.n])} 籌碼`;
   }
 
   function renderReveal(arrs, vals, sc) {
@@ -304,7 +312,7 @@
       if (sc.homerun[s]) nm.appendChild(el('span', 'badge', '全壘打'));
       else if (sc.sweep[s].some(Boolean)) nm.appendChild(el('span', 'badge', '打槍'));
       head.appendChild(nm);
-      head.appendChild(el('span', 'rv-score ' + (sc.totals[s] > 0 ? 'pos' : sc.totals[s] < 0 ? 'neg' : ''), fmt(sc.totals[s])));
+      head.appendChild(el('span', 'rv-score ' + (sc.totals[s] > 0 ? 'pos' : sc.totals[s] < 0 ? 'neg' : ''), `${fmt(sc.totals[s])} 分＝${fmt(S.delta[s])} 籌碼`));
       p.appendChild(head);
       LANES.forEach((lane, l) => {
         const row = el('div', 'rv-lane');
@@ -319,16 +327,44 @@
     }
     // 本局結算（對每位對手的勝負明細）與「下一局」放在最上方：標題列與計分板之間
     const bar = $('result-bar'); bar.textContent = ''; bar.hidden = false;
+    bar.classList.toggle('over', S.match.over);
+    if (S.match.over) appendMatchResult(bar);
     bar.appendChild(el('h2', '', `第 ${S.round} 局結算`));
     const notes = el('div', 'rv-notes');
     for (let j = 1; j < S.n; j++) notes.appendChild(el('div', '', pairNote(sc, vals, j)));
     bar.appendChild(notes);
     const act = el('div', 'rv-actions');
-    const next = el('button', 'primary', '下一局'); next.type = 'button'; next.addEventListener('click', nextRound);
+    const next = S.match.over ? el('button', 'primary', '回設定畫面，重新選擇遊戲設定') : el('button', 'primary', '下一局');
+    next.type = 'button'; next.addEventListener('click', S.match.over ? backToSetup : nextRound);
     act.appendChild(next);
-    act.appendChild(el('span', 'rv-notes', '分數為累計；所有人總分相加永遠是 0。'));
+    act.appendChild(el('span', 'rv-notes', S.match.over ? '比賽已結束，不能再接著打；回設定畫面可重新選人數、難度與起始籌碼。' : '籌碼總和永遠不變（零和）；任何人籌碼 ≤ 0 比賽就結束。'));
     bar.appendChild(act);
     next.focus({ preventScroll: true });
+  }
+
+  /** 整場結束：誰是贏家、誰破產、完整名次 */
+  function appendMatchResult(bar) {
+    const r = S.match, you = r.bankrupt.includes(0) ? 'loser' : r.winners.includes(0) ? 'winner' : 'middle';
+    const box = el('div', 'match-end');
+    box.appendChild(el('h2', '', you === 'winner' ? '🏆 比賽結束：你是贏家' : you === 'loser' ? '比賽結束：你破產了' : `比賽結束：你拿第 ${r.rank[0]} 名`));
+    const names = (a) => a.map((p) => S.names[p]).join('、');
+    box.appendChild(el('p', '', `贏家：${names(r.winners)}${r.winners.length > 1 ? '（並列）' : ''}　破產：${names(r.bankrupt)}　（共打 ${S.round} 局）`));
+    const order = [...S.chips.keys()].sort((a, b) => r.rank[a] - r.rank[b] || a - b);
+    const ul = el('ol', 'rank-list');
+    for (const p of order) {
+      const li = el('li', r.bankrupt.includes(p) ? 'neg' : '');
+      li.value = r.rank[p];
+      li.textContent = `${S.names[p]}　${S.chips[p]} 籌碼（${fmt(S.chips[p] - S.start)}）${r.bankrupt.includes(p) ? '　破產' : ''}${r.winners.includes(p) ? '　🏆' : ''}`;
+      ul.appendChild(li);
+    }
+    box.appendChild(ul);
+    bar.appendChild(box);
+  }
+
+  function backToSetup() {
+    S.phase = 'setup'; S.match = null;
+    $('screen-table').hidden = true; $('screen-setup').hidden = false; $('btn-new').hidden = true; $('seed-info').textContent = '';
+    window.scrollTo({ top: 0 });
   }
 
   // ---------- 提示 / 整理 ----------
@@ -349,16 +385,19 @@
   // ---------- 規則 ----------
   function buildRules() {
     $('rules-body').appendChild($('tpl-rules').content.cloneNode(true));
+    $('rules-chips').textContent = `開局每人 ${E.START_CHIPS.join(' 或 ')} 籌碼（開局前選）。每局的分數乘上倍率變成籌碼增減（2 人桌每分 ${E.CHIP_MULT[2]} 籌碼、3 人桌 ${E.CHIP_MULT[3]}、4 人桌 ${E.CHIP_MULT[4]}；人越多單局輸贏越大，所以倍率越小）。任何人籌碼降到 0 或以下，比賽立刻結束：籌碼最多者為贏家（同分並列）、籌碼 ≤ 0 者破產，之後回到設定畫面重新選擇。`;
   }
 
   // ---------- 事件 ----------
   function init() {
-    const n = parseInt(store('tp.n'), 10), lv = store('tp.level');
+    const n = parseInt(store('tp.n'), 10), lv = store('tp.level'), st = parseInt(store('tp.start'), 10);
     if ([2, 3, 4].includes(n)) S.n = n;
+    if (E.START_CHIPS.includes(st)) S.start = st;
     if (LEVEL_NAME[lv]) S.level = lv;
     refreshSetup(); buildRules();
     $('seg-players').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.n = parseInt(b.dataset.v, 10); store('tp.n', S.n); refreshSetup(); });
     $('seg-level').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.level = b.dataset.v; store('tp.level', S.level); refreshSetup(); });
+    $('seg-start').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; S.start = parseInt(b.dataset.v, 10); store('tp.start', S.start); refreshSetup(); });
     $('btn-start').addEventListener('click', newGame);
     $('btn-confirm').addEventListener('click', reveal);
     $('btn-clear').addEventListener('click', () => { if (S.phase !== 'arrange') return; S.loc = new Array(13).fill('tray'); S.sel.clear(); render(); });
@@ -366,8 +405,8 @@
     $('btn-hint').addEventListener('click', hint);
     $('btn-rules').addEventListener('click', () => $('dlg-rules').showModal());
     $('btn-new').addEventListener('click', () => {
-      if (S.phase !== 'setup' && !confirm('要放棄目前的牌局，回到設定畫面嗎？')) return;
-      S.phase = 'setup'; $('screen-table').hidden = true; $('screen-setup').hidden = false; $('btn-new').hidden = true; $('seed-info').textContent = '';
+      if (S.phase !== 'setup' && S.phase !== 'over' && !confirm('要放棄目前的賽局，回到設定畫面嗎？（目前籌碼不保留）')) return;
+      backToSetup();
     });
     $('btn-sort').textContent = '依花色整理';
     initSelection();

@@ -159,3 +159,11 @@ footer .ver { opacity: .7; }
 .selbar #btn-confirm { margin-left: auto; padding: 8px 24px; }
 .selbar .status { flex-basis: 100%; order: 10; margin: 0; font-size: .85rem; }
 .selbar .status:empty { display: none; }
+
+/* 籌碼賽局：整場結束區塊 */
+.result-bar.over { border-width: 2px; }
+.match-end { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--panel-edge); }
+.match-end h2 { font-size: 1.25rem; color: var(--accent); margin: 0 0 6px; }
+.match-end p { margin: 4px 0; }
+.rank-list { margin: 6px 0 0; padding-left: 1.6em; font-variant-numeric: tabular-nums; line-height: 1.8; }
+.pchip .st.neg { color: var(--bad); font-weight: 700; }

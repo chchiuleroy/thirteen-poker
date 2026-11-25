@@ -332,10 +332,23 @@
     return RANK_NAME[(c >> 2) + 2] + SUIT_CHAR[c & 3];
   }
 
+  // ---------- 籌碼賽局（見 docs/SCORING.md） ----------
+  const START_CHIPS = [300, 500];            // 可選的起始籌碼
+  const CHIP_MULT = { 2: 15, 3: 6, 4: 5 };   // 每 1 分換幾籌碼（依人數校準，使 300 籌碼約 15–22 局、500 籌碼約 40–60 局，見 docs/SCORING.md）
+  /** 整場結果：任何人籌碼 ≤ 0 即結束；名次依籌碼由高到低、同分並列；籌碼 ≤ 0 者都算破產。 */
+  function matchResult(chips) {
+    const n = chips.length;
+    const rank = chips.map((c) => 1 + chips.filter((o) => o > c).length);
+    const bankrupt = [], winners = [];
+    for (let i = 0; i < n; i++) { if (chips[i] <= 0) bankrupt.push(i); if (rank[i] === 1) winners.push(i); }
+    return { over: bankrupt.length > 0, rank, winners, bankrupt };
+  }
+
   return {
     JOKER, CAT, CAT_NAME, RANK_NAME, SUIT_CHAR, BONUS, B5,
     V, catOf, eval3, eval5, evalLane, laneName, laneBonus, isFoul, frontFoul, FRONT_UNIT, FRONT_SUIT_MASK, SK, CATB, rankPart,
     scoreValues, scoreRound, valuesOf,
     mulberry32, makeShoe, shuffle, deal, cardLabel,
+    START_CHIPS, CHIP_MULT, matchResult,
   };
 });

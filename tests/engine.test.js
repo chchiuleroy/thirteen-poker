@@ -277,3 +277,30 @@ test('玩家之間比牌：點數同牌型時由花色分勝負，不再平手�
   assert.deepEqual(r.totals, [1, -1]);
   assert.deepEqual(E.scoreRound([mk(3), mk(3)]).totals, [0, 0]); // 完全相同 → 平手
 });
+
+test('籌碼賽局：沒人 ≤ 0 就繼續；有人 ≤ 0 即結束，籌碼最多者贏、同分並列、所有 ≤ 0 者都破產', () => {
+  assert.equal(E.matchResult([300, 300]).over, false);
+  assert.equal(E.matchResult([1, 599]).over, false);                       // 剩 1 籌碼還沒破產
+  const a = E.matchResult([0, 600]);                                       // 剛好歸零 → 破產
+  assert.deepEqual([a.over, a.bankrupt, a.winners, a.rank], [true, [0], [1], [2, 1]]);
+  const b = E.matchResult([-35, 200, 435]);                                // 負數也算破產；贏家是最多者
+  assert.deepEqual([b.bankrupt, b.winners, b.rank], [[0], [2], [3, 2, 1]]);
+  const c = E.matchResult([-10, -20, 500, 530]);                           // 同局兩人跌破 0：都破產
+  assert.deepEqual([c.bankrupt, c.winners, c.rank], [[0, 1], [3], [3, 4, 2, 1]]);
+  const d = E.matchResult([0, 250, 250]);                                  // 贏家並列
+  assert.deepEqual([d.winners, d.rank], [[1, 2], [3, 1, 1]]);
+});
+
+test('籌碼賽局：每局分數×倍率後籌碼總和不變（零和），倍率與起始籌碼設定完整', () => {
+  assert.deepEqual(E.START_CHIPS, [300, 500]);
+  for (const n of [2, 3, 4]) {
+    assert.ok(E.CHIP_MULT[n] > 0);
+    const rng = E.mulberry32(99 + n);
+    for (let t = 0; t < 20; t++) {
+      const hands = E.deal(n, rng);
+      const arrs = hands.map((h) => AI.choose('hard', h, { n, rng, tables, models: Array.from({ length: n - 1 }, () => AI.makeModel()) }));
+      const sc = E.scoreRound(arrs);
+      assert.equal(sc.totals.reduce((x, y) => x + y, 0) * E.CHIP_MULT[n], 0);
+    }
+  }
+});
